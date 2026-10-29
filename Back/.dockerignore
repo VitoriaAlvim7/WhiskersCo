@@ -1,0 +1,9 @@
+target
+uploads
+uploads-teste
+backups
+.env
+.idea
+*.iml
+*.log
+seed-teste-dev.sql
