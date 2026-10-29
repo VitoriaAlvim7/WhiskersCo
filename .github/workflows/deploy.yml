@@ -1,0 +1,98 @@
+# A cada push na main: testa o back, compila o front e, se tudo passar,
+# pede ao Coolify para fazer o deploy da versão nova.
+#
+# Segredos necessários (Settings > Secrets and variables > Actions):
+#   COOLIFY_WEBHOOK  URL de deploy do recurso no Coolify (aba Webhooks do recurso)
+#   COOLIFY_TOKEN    token de API do Coolify (Keys & Tokens > API tokens, permissão "deploy")
+
+name: Testes e deploy no Coolify
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  back:
+    name: Back - testes
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Back
+
+    # O teste que sobe a aplicação inteira precisa de um PostgreSQL de verdade.
+    services:
+      db:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: whiskers
+          POSTGRES_USER: whiskers
+          POSTGRES_PASSWORD: whiskers-ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U whiskers -d whiskers"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: whiskers
+      POSTGRES_USER: whiskers
+      POSTGRES_PASSWORD: whiskers-ci
+      JWT_SECRET: segredo-apenas-para-os-testes-do-ci
+      TZ: America/Sao_Paulo
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Rodar os testes
+        run: mvn -B test
+
+  front:
+    name: Front - build de produção
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: Front
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: Front/package-lock.json
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Build de produção
+        run: npx ng build --configuration production
+
+  deploy:
+    name: Deploy no Coolify
+    needs: [back, front]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Disparar o deploy
+        env:
+          COOLIFY_WEBHOOK: ${{ secrets.COOLIFY_WEBHOOK }}
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+        run: |
+          if [ -z "$COOLIFY_WEBHOOK" ] || [ -z "$COOLIFY_TOKEN" ]; then
+            echo "::error::Defina os segredos COOLIFY_WEBHOOK e COOLIFY_TOKEN no repositório."
+            exit 1
+          fi
+          curl --fail-with-body -sS -X GET "$COOLIFY_WEBHOOK" \
+            -H "Authorization: Bearer $COOLIFY_TOKEN"
