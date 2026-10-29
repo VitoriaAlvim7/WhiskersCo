@@ -1,4 +1,3 @@
-<p align="center"><img src="logo.png" alt="Whiskers & Co." width="160"></p>
 
 # Whiskers & Co.
 
