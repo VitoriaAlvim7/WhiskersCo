@@ -1,0 +1,19 @@
+# Backup do projeto (125 MB) — não versionar
+WhiskersCo.zip
+
+# Logs de execução local
+*.log
+
+# Caches de ferramenta
+.angular/
+.DS_Store
+Thumbs.db
+
+# Carga de teste do banco de dev (nao e migration)
+Back/seed-teste-dev.sql
+
+# Fotos de apoio da apresentacao (imagens baixadas, nao fazem parte do codigo)
+fotos-apresentacao/
+
+# Configuracao local do Claude Code
+.claude/
