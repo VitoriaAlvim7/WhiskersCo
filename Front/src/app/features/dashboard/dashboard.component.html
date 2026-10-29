@@ -1,0 +1,358 @@
+<div class="app-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content fade-up" id="conteudo-principal" tabindex="-1">
+
+    <div class="dash-header">
+      <div class="dash-saudacao">
+        <h1 class="page-title">Olá, {{ usuarioNome || 'bem-vindo' }}</h1>
+        <p class="dash-sub">Visão geral da clínica</p>
+      </div>
+      <div class="dash-actions">
+        <button class="btn-primary" (click)="abrirNovaConsulta()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Nova consulta
+        </button>
+        <div class="menu-container">
+          <button
+            type="button"
+            class="icon-btn sino"
+            (click)="abrirNotificacoes()"
+            [attr.aria-label]="naoLidas > 0
+              ? 'Notificações, ' + naoLidas + ' não lida(s)'
+              : 'Notificações'"
+            [attr.aria-expanded]="notificacoesAberto"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            <span class="sino-bolinha" *ngIf="naoLidas > 0" aria-hidden="true"></span>
+          </button>
+          <div class="dropdown-menu notificacoes-menu" *ngIf="notificacoesAberto" (click)="$event.stopPropagation()">
+            <div class="menu-header">
+              <h3>Notificações</h3>
+              <button class="menu-close" (click)="fecharMenus()" aria-label="Fechar">
+            <app-icon nome="fechar" [tamanho]="18"></app-icon>
+          </button>
+            </div>
+            <div class="menu-body">
+              <div class="notificacao-item" *ngFor="let n of notificacoesDoMenu" [class.nao-lida]="!n.lida">
+                <div class="notif-conteudo">
+                  <p class="notif-titulo">{{ n.titulo }}</p>
+                  <p class="notif-tempo">{{ quando(n.criadaEm) }}</p>
+                </div>
+                <button
+                  type="button"
+                  class="btn-acao perigo"
+                  (click)="excluirNotificacao(n)"
+                  [attr.aria-label]="'Excluir notificação: ' + n.titulo"
+                >
+                  <app-icon nome="lixeira" [tamanho]="14"></app-icon>
+                </button>
+              </div>
+              <div class="notificacao-vazia" *ngIf="notificacoes.length === 0">
+                Nenhuma novidade por aqui ainda.
+              </div>
+            </div>
+            <div class="menu-footer menu-footer-notif">
+              <button
+                type="button"
+                class="btn-link"
+                [disabled]="naoLidas === 0"
+                (click)="marcarTodasComoVistas()"
+              >
+                Marcar todas como vistas
+              </button>
+              <button type="button" class="btn-link" (click)="abrirTodasNotificacoes()">
+                Ver todas as notificações
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="menu-container">
+          <button class="icon-btn avatar-btn" (click)="abrirPerfil()" title="Perfil">
+            <img *ngIf="usuarioFoto" class="avatar-foto" [src]="usuarioFoto" alt="" />
+            <svg *ngIf="!usuarioFoto" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+              <circle cx="12" cy="7" r="4"/>
+            </svg>
+          </button>
+          <div class="dropdown-menu perfil-menu" *ngIf="perfilAberto" (click)="$event.stopPropagation()">
+            <div class="menu-header">
+              <h3>Perfil</h3>
+              <button class="menu-close" (click)="fecharMenus()" aria-label="Fechar">
+            <app-icon nome="fechar" [tamanho]="18"></app-icon>
+          </button>
+            </div>
+            <div class="menu-body usuario-info">
+              <div class="user-avatar">
+                <img *ngIf="usuarioFoto" class="avatar-foto grande" [src]="usuarioFoto" alt="" />
+                <svg *ngIf="!usuarioFoto" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </div>
+              <div class="user-details">
+                <p class="user-name">{{ usuarioNome }}</p>
+                <p class="user-email">{{ usuarioEmail }}</p>
+              </div>
+            </div>
+            <div class="menu-divider"></div>
+            <div class="menu-body">
+              <button class="menu-item" routerLink="/perfil">Editar Perfil</button>
+              <button class="menu-item" routerLink="/configuracoes">Configurações</button>
+              <button class="menu-item" routerLink="/ajuda">Ajuda</button>
+            </div>
+            <div class="menu-divider"></div>
+            <div class="menu-footer">
+              <button class="btn-danger btn-block" (click)="logout()">Sair</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="kpi-grid">
+      <a class="kpi-card kpi-link" routerLink="/pacientes">
+        <div class="kpi-icon"><app-icon nome="pata" [tamanho]="24"></app-icon></div>
+        <div>
+          <p class="kpi-label">Total de pacientes</p>
+          <p class="kpi-value">{{ totalPacientes }}</p>
+        </div>
+      </a>
+      <a class="kpi-card kpi-link" routerLink="/agenda" [queryParams]="{ dia: hojeIso }">
+        <div class="kpi-icon"><app-icon nome="calendario" [tamanho]="24"></app-icon></div>
+        <div>
+          <p class="kpi-label">Agendamentos</p>
+          <p class="kpi-value">{{ totalAgendamentos }}</p>
+        </div>
+      </a>
+      <button type="button" class="kpi-card kpi-link" (click)="abrirValores()">
+        <div class="kpi-icon"><app-icon nome="valores" [tamanho]="24"></app-icon></div>
+        <div>
+          <p class="kpi-label">Valores</p>
+          <p class="kpi-value kpi-link-text">Consultar valores</p>
+        </div>
+      </button>
+      <a class="kpi-card kpi-link" routerLink="/estoque">
+        <div class="kpi-icon"><app-icon nome="estoque" [tamanho]="24"></app-icon></div>
+        <div>
+          <p class="kpi-label">Estoque</p>
+          <p class="kpi-value">{{ totalEstoque }}</p>
+        </div>
+      </a>
+    </div>
+
+    <div class="dash-bottom">
+
+      <div class="wc-card consultas-card">
+        <h2 class="section-title">Consultas</h2>
+        <table class="wc-table">
+          <thead>
+            <tr>
+              <th>Horário</th>
+              <th>Nome do pet</th>
+              <th>Veterinário</th>
+              <th>Razão</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let c of consultas">
+              <td>{{ c.dataHora.substring(11, 16) }}</td>
+              <td class="pet-name">{{ c.paciente }}</td>
+              <td>{{ c.funcionario }}</td>
+              <td>{{ c.motivo }}</td>
+              <td>
+                <span class="badge" [ngClass]="(c.status || '') | lowercase">
+                  {{ statusLabel(c.status) }}
+                </span>
+              </td>
+            </tr>
+            <tr *ngIf="consultas.length === 0">
+              <td colspan="5" class="empty-row">Nenhuma consulta hoje.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="wc-card atividades-card">
+        <h2 class="section-title">Atividades recentes</h2>
+        <div class="atividades-list">
+          <div class="atividade-item" *ngFor="let a of notificacoesDoMenu">
+            <div class="atv-icon">
+              <app-icon [nome]="icone(a.tipo)" [tamanho]="18"></app-icon>
+            </div>
+            <div class="atividade-texto">
+              <p>{{ a.titulo }}</p>
+              <span class="atividade-quando">{{ quando(a.criadaEm) }}</span>
+            </div>
+          </div>
+          <p class="sem-atividade" *ngIf="notificacoes.length === 0">Nenhuma atividade recente.</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" *ngIf="modalAberto" (click)="fecharModal()">
+  <div class="modal-box" appModalAcessivel (fechar)="fecharModal()" aria-labelledby="dashboard-modal-titulo" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 id="dashboard-modal-titulo">Nova Consulta</h2>
+      <button class="modal-close" (click)="fecharModal()" aria-label="Fechar">
+            <app-icon nome="fechar" [tamanho]="18"></app-icon>
+          </button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="salvar()" class="modal-form">
+      <label for="dash-paciente">Paciente *</label>
+      <select id="dash-paciente" class="wc-input" formControlName="pacienteId">
+        <option value="">Selecione um paciente</option>
+        <option *ngFor="let p of pacientes" [value]="p.id">{{ p.nome }}</option>
+      </select>
+      <button type="button" class="atalho-cadastro" (click)="abrirNovoPaciente()">
+        + Cadastrar novo paciente
+      </button>
+
+      <label for="dash-veterinario">Veterinário *</label>
+      <select
+        id="dash-veterinario"
+        class="wc-input"
+        formControlName="funcionarioId"
+        *ngIf="veterinarios.length > 0"
+      >
+        <option value="">Selecione um veterinário</option>
+        <option *ngFor="let v of veterinarios" [value]="v.id">{{ v.nome }}</option>
+      </select>
+      <p class="campo-vazio" *ngIf="veterinarios.length === 0 && !carregandoVeterinarios">
+        Nenhum veterinário ativo cadastrado.
+        <a routerLink="/funcionarios">Cadastre um em Funcionários</a> para poder agendar consultas.
+      </p>
+
+      <label>Data *</label>
+      <input class="wc-input" formControlName="data" type="date" />
+
+      <label>Horário *</label>
+      <input class="wc-input" formControlName="horario" type="time" />
+
+      <label>Motivo *</label>
+      <input class="wc-input" formControlName="motivo" placeholder="Ex: Vacinação, Consulta de rotina..." />
+
+      <p class="modal-erro" *ngIf="erro">{{ erro }}</p>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-outline" (click)="fecharModal()">Cancelar</button>
+        <button type="submit" class="btn-primary" [disabled]="form.invalid || salvando">
+          {{ salvando ? 'Salvando...' : 'Salvar' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="modalValoresAberto" (click)="fecharValores()">
+  <div class="modal-box" appModalAcessivel (fechar)="fecharValores()" aria-labelledby="dashboard-valores-titulo" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 id="dashboard-valores-titulo">Tabela de preços</h2>
+      <button type="button" class="modal-close" (click)="fecharValores()" aria-label="Fechar">
+        <app-icon nome="fechar" [tamanho]="18"></app-icon>
+      </button>
+    </div>
+
+    <div class="valores-corpo">
+    <table class="wc-table">
+      <thead>
+        <tr>
+          <th>Serviço</th>
+          <th>Tipo</th>
+          <th>Valor</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let s of servicos">
+          <td>{{ s.nome }}</td>
+          <td>{{ tipoServicoLabel(s.tipoServico) }}</td>
+          <td>{{ moeda(s.preco) }}</td>
+        </tr>
+        <tr *ngIf="servicos.length === 0">
+          <td colspan="3" class="empty-row">Nenhum serviço cadastrado no Estoque.</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="modal-footer">
+      <a class="btn-outline" routerLink="/estoque" (click)="fecharValores()">Gerenciar no Estoque</a>
+      <button type="button" class="btn-primary" (click)="fecharValores()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="modalNotificacoesAberto" (click)="fecharTodasNotificacoes()">
+  <div class="modal-box" appModalAcessivel (fechar)="fecharTodasNotificacoes()" aria-labelledby="dashboard-notif-titulo" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 id="dashboard-notif-titulo">Notificações</h2>
+      <button type="button" class="modal-close" (click)="fecharTodasNotificacoes()" aria-label="Fechar">
+        <app-icon nome="fechar" [tamanho]="18"></app-icon>
+      </button>
+    </div>
+
+    <div class="todas-notif">
+      <p class="todas-resumo">
+        {{ notificacoes.length }} de no máximo 10 · {{ naoLidas }} não lida(s)
+      </p>
+
+      <div class="notificacao-item" *ngFor="let n of notificacoes" [class.nao-lida]="!n.lida">
+        <div class="atv-icon"><app-icon [nome]="icone(n.tipo)" [tamanho]="16"></app-icon></div>
+        <div class="notif-conteudo">
+          <p class="notif-titulo">{{ n.titulo }}</p>
+          <p class="notif-tempo">{{ quando(n.criadaEm) }}</p>
+        </div>
+        <button
+          type="button"
+          class="btn-acao perigo"
+          (click)="excluirNotificacao(n)"
+          [attr.aria-label]="'Excluir notificação: ' + n.titulo"
+        >
+          <app-icon nome="lixeira" [tamanho]="16"></app-icon>
+        </button>
+      </div>
+
+      <p class="notificacao-vazia" *ngIf="notificacoes.length === 0">
+        Nenhuma notificação por aqui ainda.
+      </p>
+    </div>
+
+    <div class="modal-footer">
+      <button
+        type="button"
+        class="btn-outline"
+        [disabled]="naoLidas === 0"
+        (click)="marcarTodasComoVistas()"
+      >
+        Marcar todas como vistas
+      </button>
+      <button type="button" class="btn-primary" (click)="fecharTodasNotificacoes()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<app-paciente-form-modal
+  [aberto]="modalPacienteAberto"
+  [tutores]="tutores"
+  [permiteNovoTutor]="true"
+  (fechar)="fecharNovoPaciente()"
+  (salvo)="aoSalvarPaciente($event)"
+  (novoTutor)="abrirNovoTutor()"
+></app-paciente-form-modal>
+
+<app-tutor-form-modal
+  [aberto]="modalTutorAberto"
+  (fechar)="fecharNovoTutor()"
+  (salvo)="aoSalvarTutor($event)"
+></app-tutor-form-modal>

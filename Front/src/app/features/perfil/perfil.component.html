@@ -1,0 +1,65 @@
+<div class="app-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content fade-up" id="conteudo-principal" tabindex="-1">
+    <div class="page-top">
+      <app-back-button></app-back-button>
+      <h1 class="page-title">Meu Perfil</h1>
+    </div>
+
+    <div class="loading" *ngIf="carregando">Carregando...</div>
+
+    <div class="wc-card" *ngIf="semId">
+      <p class="msg-erro">Sua sessão é antiga e não tem os dados necessários. Saia e entre novamente para editar o perfil.</p>
+    </div>
+
+    <ng-container *ngIf="!carregando && !semId">
+      <div class="wc-card perfil-card">
+        <h2 class="section-title">Dados pessoais</h2>
+        <form [formGroup]="formDados" (ngSubmit)="salvarDados()" class="perfil-form">
+          <app-upload-foto
+            rotulo="Foto de perfil"
+            iconePlaceholder="pessoa"
+            [fotoUrl]="formDados.get('fotoUrl')?.value"
+            [descricao]="formDados.get('nome')?.value || 'perfil'"
+            (fotoUrlChange)="aoTrocarFoto($event)"
+          ></app-upload-foto>
+
+          <label>Nome</label>
+          <input class="wc-input" formControlName="nome" />
+
+          <label>E-mail</label>
+          <input class="wc-input" type="email" formControlName="email" />
+
+          <p class="msg-sucesso" *ngIf="sucessoDados">{{ sucessoDados }}</p>
+          <p class="msg-erro" *ngIf="erroDados">{{ erroDados }}</p>
+
+          <button type="submit" class="btn-primary" [disabled]="salvandoDados || formDados.invalid">
+            {{ salvandoDados ? 'Salvando...' : 'Salvar dados' }}
+          </button>
+        </form>
+      </div>
+
+      <div class="wc-card perfil-card mt-24">
+        <h2 class="section-title">Alterar senha</h2>
+        <form [formGroup]="formSenha" (ngSubmit)="salvarSenha()" class="perfil-form">
+          <label>Senha atual</label>
+          <input class="wc-input" type="password" formControlName="senhaAtual" />
+
+          <label>Nova senha</label>
+          <input class="wc-input" type="password" formControlName="novaSenha" placeholder="Mínimo 6 caracteres" />
+
+          <label>Confirmar nova senha</label>
+          <input class="wc-input" type="password" formControlName="confirmar" />
+
+          <p class="msg-sucesso" *ngIf="sucessoSenha">{{ sucessoSenha }}</p>
+          <p class="msg-erro" *ngIf="erroSenha">{{ erroSenha }}</p>
+
+          <button type="submit" class="btn-primary" [disabled]="salvandoSenha || formSenha.invalid">
+            {{ salvandoSenha ? 'Salvando...' : 'Alterar senha' }}
+          </button>
+        </form>
+      </div>
+    </ng-container>
+  </main>
+</div>

@@ -1,0 +1,23 @@
+<div class="campo-senha">
+  <input
+    [id]="id"
+    class="wc-input"
+    [type]="visivel ? 'text' : 'password'"
+    [placeholder]="placeholder"
+    [autocomplete]="autocomplete"
+    [value]="valor"
+    [disabled]="desabilitado"
+    (input)="digitou($event)"
+    (blur)="tocou()"
+  />
+  <button
+    type="button"
+    class="botao-olho"
+    [disabled]="desabilitado"
+    (click)="alternarVisibilidade()"
+    [attr.aria-label]="visivel ? 'Ocultar senha' : 'Mostrar senha'"
+    [attr.aria-pressed]="visivel"
+  >
+    <app-icon [nome]="visivel ? 'olho-fechado' : 'olho'" [tamanho]="18"></app-icon>
+  </button>
+</div>

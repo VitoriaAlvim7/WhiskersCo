@@ -1,0 +1,130 @@
+<div class="app-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content fade-up" id="conteudo-principal" tabindex="-1">
+    <div class="page-top">
+      <div>
+        <h1 class="page-title">Receituários</h1>
+        <p class="page-subtitle">Prescrições emitidas em consultas</p>
+      </div>
+      <button class="btn-primary" (click)="abrirModal()">+ Novo Receituário</button>
+    </div>
+
+    <div class="wc-card">
+      <input
+        class="wc-input busca-input"
+        placeholder="Buscar por prescrição ou consulta..."
+        [(ngModel)]="busca"
+        (ngModelChange)="filtrar()"
+      />
+
+      <div class="loading" *ngIf="carregando">Carregando...</div>
+
+      <div class="erro-carregamento" *ngIf="!carregando && erroCarregar" role="alert">
+        Não foi possível carregar os receituários agora.
+        <button type="button" (click)="carregar()">Tentar novamente</button>
+      </div>
+
+      <table class="wc-table" *ngIf="!carregando && !erroCarregar">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Consulta</th>
+            <th>Prescrição</th>
+            <th><span class="sr-only">Ações</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let r of paginados">
+            <td>{{ r.dataEmissao.split('-').reverse().join('/') }}</td>
+            <td>{{ r.consulta }}</td>
+            <td class="prescricao-cell">{{ r.prescricao }}</td>
+            <td class="row-actions">
+              <button
+                type="button"
+                class="btn-acao"
+                [disabled]="baixando === r.id"
+                (click)="baixar(r)"
+                [attr.aria-label]="'Baixar PDF do receituário de ' + (r.consulta || 'consulta')"
+              >
+                <app-icon nome="baixar" [tamanho]="16"></app-icon>
+              </button>
+              <button
+                type="button"
+                class="btn-acao"
+                (click)="imprimir(r)"
+                [attr.aria-label]="'Imprimir receituário de ' + (r.consulta || 'consulta')"
+              >
+                <app-icon nome="imprimir" [tamanho]="16"></app-icon>
+              </button>
+              <button
+                type="button"
+                class="btn-acao"
+                (click)="abrirModal(r)"
+                [attr.aria-label]="'Editar receituário de ' + (r.consulta || 'consulta')"
+              >
+                <app-icon nome="editar" [tamanho]="16"></app-icon>
+              </button>
+              <button
+                type="button"
+                class="btn-acao perigo"
+                (click)="excluir(r.id!)"
+                [attr.aria-label]="'Excluir receituário de ' + (r.consulta || 'consulta')"
+              >
+                <app-icon nome="lixeira" [tamanho]="16"></app-icon>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="filtrados.length === 0">
+            <td colspan="4" class="empty-row">Nenhum receituário emitido ainda.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <app-paginacao
+        *ngIf="!carregando && !erroCarregar"
+        [total]="filtrados.length"
+        [pagina]="pagina"
+        rotulo="Paginação de receituários"
+        (paginaChange)="pagina = $event"
+      ></app-paginacao>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" *ngIf="modalAberto" (click)="fecharModal()">
+  <div class="modal-box" appModalAcessivel (fechar)="fecharModal()" aria-labelledby="receituarios-modal-titulo" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 id="receituarios-modal-titulo">{{ editando ? 'Editar' : 'Novo' }} Receituário</h2>
+      <button class="modal-close" (click)="fecharModal()" aria-label="Fechar">
+            <app-icon nome="fechar" [tamanho]="18"></app-icon>
+          </button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="salvar()" class="modal-form">
+      <label>Consulta *</label>
+      <select class="wc-input" formControlName="consultaId">
+        <option value="">Selecione a consulta</option>
+        <option *ngFor="let c of consultasElegiveis" [value]="c.id">{{ consultaLabel(c) }}</option>
+      </select>
+      <small class="campo-vazio"*ngIf="!editando && consultasElegiveis.length === 0">
+        Nenhuma consulta finalizada sem receita. Finalize a consulta na Agenda para gerar a receita.
+      </small>
+
+      <label>Data de emissão *</label>
+      <input class="wc-input" type="date" formControlName="dataEmissao" />
+
+      <label>Prescrição *</label>
+      <textarea class="wc-input" rows="5" formControlName="prescricao" placeholder="Medicamentos, dosagem, orientações..."></textarea>
+
+      <p class="modal-erro" *ngIf="erro">{{ erro }}</p>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-outline" (click)="fecharModal()">Cancelar</button>
+        <button type="submit" class="btn-primary" [disabled]="salvando || form.invalid">
+          {{ salvando ? 'Salvando...' : 'Salvar' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

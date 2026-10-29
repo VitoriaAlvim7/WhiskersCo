@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <title>Whiskers &amp; Co. — laboratório de design</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <script>
+    // ?theme=dark reproduz o que o ThemeService faz no app real
+    if (new URLSearchParams(location.search).get('theme') === 'dark') {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    }
+  </script>
+  <style>
+    body { padding: 24px 32px; }
+    .lab-sec { margin-bottom: 28px; }
+    .lab-sec > h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em;
+                    color: var(--text-muted); margin-bottom: 10px; }
+    .lab-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+    .lab-grid4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .lab-swatch { border-radius: 8px; height: 56px; display: flex; align-items: flex-end;
+                  padding: 6px; font-size: 11px; font-weight: 700; border: 1px solid var(--border); }
+    .lab-icon-btn { width: 40px; height: 40px; border-radius: 50%; border: none; background: var(--bg-elevated);
+                    box-shadow: var(--shadow); display: flex; align-items: center; justify-content: center; }
+    .lab-kpi { background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow);
+               padding: 20px 24px; display: flex; align-items: center; gap: 18px; }
+    .lab-kpi-icon { width: 52px; height: 52px; border-radius: 50%; color: var(--primary-text);
+                    background: var(--bg-hover); display: flex; align-items: center; justify-content: center; }
+    .lab-kpi-label { font-size: 13px; color: var(--text-muted); margin-bottom: 4px; }
+    .lab-kpi-value { font-size: 22px; font-weight: 800; }
+  </style>
+</head>
+<body>
+
+<div class="lab-sec">
+  <h2>Tokens</h2>
+  <div class="lab-grid4">
+    <div class="lab-swatch" style="background: var(--bg-page); color: var(--text-main)">--bg-page</div>
+    <div class="lab-swatch" style="background: var(--bg-card); color: var(--text-main)">--bg-card</div>
+    <div class="lab-swatch" style="background: var(--bg-sidebar); color: #fff">--bg-sidebar</div>
+    <div class="lab-swatch" style="background: var(--primary); color: #fff">--primary</div>
+  </div>
+</div>
+
+<div class="lab-sec">
+  <h2>Botões</h2>
+  <div class="lab-row">
+    <button class="btn-primary">Nova consulta</button>
+    <button class="btn-primary" disabled>Salvando...</button>
+    <button class="btn-outline">Editar</button>
+    <button class="btn-danger">Excluir</button>
+  </div>
+</div>
+
+<div class="lab-sec">
+  <h2>icon-btn do header</h2>
+  <div class="lab-row" style="background: var(--bg-page); padding: 12px; border-radius: 8px">
+    <button class="lab-icon-btn" style="color: var(--text-muted)">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    </button>
+    <button class="lab-icon-btn" style="color: var(--primary)">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+    </button>
+  </div>
+</div>
+
+<div class="lab-sec">
+  <h2>Inputs</h2>
+  <div class="lab-row">
+    <input class="wc-input" style="max-width:260px" placeholder="Digite o seu email" />
+    <select class="wc-input" style="max-width:200px"><option>Selecione um tutor</option></select>
+    <div class="search-bar" style="max-width:240px"><input placeholder="Buscar paciente..." /></div>
+  </div>
+</div>
+
+<div class="lab-sec">
+  <h2>Chips de filtro</h2>
+  <div class="filtro-chips">
+    <button class="chip ativo">Todos <span class="chip-contagem">6</span></button>
+    <button class="chip">Disponível <span class="chip-contagem">3</span></button>
+    <button class="chip">Em tratamento <span class="chip-contagem">1</span></button>
+    <button class="chip">Adotado <span class="chip-contagem">2</span></button>
+  </div>
+</div>
+
+<div class="lab-sec">
+  <h2>Badges</h2>
+  <div class="lab-row">
+    <span class="badge agendada">Agendada</span>
+    <span class="badge em_andamento">Em andamento</span>
+    <span class="badge finalizada">Finalizada</span>
+    <span class="badge cancelada">Cancelada</span>
+    <span class="badge disponivel">Disponível</span>
+    <span class="badge em_tratamento">Em tratamento</span>
+    <span class="badge adotado">Adotado</span>
+    <span class="badge ativo">Ativo</span>
+    <span class="badge inativo">Inativo</span>
+  </div>
+</div>
+
+<div class="lab-sec">
+  <h2>KPI cards</h2>
+  <div class="lab-grid4">
+    <div class="lab-kpi">
+      <div class="lab-kpi-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><path d="M9 10a5 5 0 0 1 5 5v3.5a3.5 3.5 0 0 1-6.84 1.045Q6.52 17.48 4.46 16.84A3.5 3.5 0 0 1 5.5 10Z"/></svg></div>
+      <div><p class="lab-kpi-label">Total de pacientes</p><p class="lab-kpi-value">12</p></div>
+    </div>
+    <div class="lab-kpi">
+      <div class="lab-kpi-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+      <div><p class="lab-kpi-label">Agendamentos</p><p class="lab-kpi-value">4</p></div>
+    </div>
+    <div class="lab-kpi">
+      <div class="lab-kpi-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
+      <div><p class="lab-kpi-label">Valores</p><p class="lab-kpi-value" style="color:var(--primary-text)">Consultar valores</p></div>
+    </div>
+    <div class="lab-kpi">
+      <div class="lab-kpi-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg></div>
+      <div><p class="lab-kpi-label">Estoque</p><p class="lab-kpi-value">37</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="lab-sec">
+  <h2>Tabela</h2>
+  <div class="wc-card">
+    <table class="wc-table">
+      <thead><tr><th>Horário</th><th>Nome do pet</th><th>Veterinário</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>09:00</td><td>Nina</td><td>Dra. Vitória</td><td><span class="badge agendada">Agendada</span></td></tr>
+        <tr><td>10:30</td><td>Thor</td><td>Dr. Felipe</td><td><span class="badge finalizada">Finalizada</span></td></tr>
+        <tr><td>14:00</td><td>Luna</td><td>Dra. Vitória</td><td><span class="badge cancelada">Cancelada</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="lab-sec">
+  <h2>Modal</h2>
+  <div style="background:var(--bg-elevated);border-radius:var(--radius);box-shadow:var(--shadow);max-width:420px">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:20px 24px;border-bottom:1px solid var(--border)">
+      <h2 style="font-size:18px;font-weight:800">Nova Consulta</h2>
+      <button aria-label="Fechar" style="background:none;border:none;cursor:pointer;color:var(--text-muted);display:flex"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div style="padding:20px 24px;display:flex;flex-direction:column;gap:8px">
+      <label style="font-size:13px;font-weight:700">Paciente *</label>
+      <input class="wc-input" placeholder="Selecione um paciente" />
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+        <button class="btn-outline">Cancelar</button>
+        <button class="btn-primary">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

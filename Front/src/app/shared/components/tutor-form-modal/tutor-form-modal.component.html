@@ -1,0 +1,49 @@
+<div class="modal-overlay" *ngIf="aberto" (click)="fechar.emit()">
+  <div class="modal-box" appModalAcessivel (fechar)="fechar.emit()" aria-labelledby="tutor-form-titulo" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 id="tutor-form-titulo">{{ editando ? 'Editar' : 'Novo' }} Tutor</h2>
+      <button type="button" class="modal-close" (click)="fechar.emit()" aria-label="Fechar">
+        <app-icon nome="fechar" [tamanho]="18"></app-icon>
+      </button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="salvar()" class="modal-form">
+      <label for="tf-nome">Nome *</label>
+      <input id="tf-nome" class="wc-input" formControlName="nome" placeholder="Nome completo" />
+
+      <label for="tf-cpf">CPF *</label>
+      <input
+        id="tf-cpf"
+        class="wc-input"
+        formControlName="cpf"
+        inputmode="numeric"
+        autocomplete="off"
+        placeholder="000.000.000-00"
+        (input)="aoDigitarCpf($event)"
+      />
+
+      <label for="tf-telefone">Telefone *</label>
+      <input
+        id="tf-telefone"
+        class="wc-input"
+        formControlName="telefone"
+        inputmode="tel"
+        autocomplete="off"
+        placeholder="(00) 00000-0000"
+        (input)="aoDigitarTelefone($event)"
+      />
+
+      <label for="tf-endereco">Endereço</label>
+      <input id="tf-endereco" class="wc-input" formControlName="endereco" placeholder="Rua, número, bairro..." />
+
+      <p class="modal-erro" *ngIf="erro">{{ erro }}</p>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-outline" (click)="fechar.emit()">Cancelar</button>
+        <button type="submit" class="btn-primary" [disabled]="form.invalid || salvando">
+          {{ salvando ? 'Salvando...' : 'Salvar' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,69 @@
+<div class="modal-overlay" *ngIf="aberto" (click)="fechar.emit()">
+  <div class="modal-box" appModalAcessivel (fechar)="fechar.emit()" aria-labelledby="paciente-form-titulo" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 id="paciente-form-titulo">{{ editando ? 'Editar' : 'Novo' }} Paciente</h2>
+      <button type="button" class="modal-close" (click)="fechar.emit()" aria-label="Fechar">
+        <app-icon nome="fechar" [tamanho]="18"></app-icon>
+      </button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="salvar()" class="modal-form">
+      <app-upload-foto
+        rotulo="Foto do paciente"
+        [fotoUrl]="form.get('fotoUrl')?.value"
+        [descricao]="form.get('nome')?.value || 'paciente'"
+        (fotoUrlChange)="aoTrocarFoto($event)"
+      ></app-upload-foto>
+
+      <label for="pf-nome">Nome *</label>
+      <input id="pf-nome" class="wc-input" formControlName="nome" placeholder="Nome do animal" />
+
+      <label for="pf-raca">Espécie / Raça *</label>
+      <input id="pf-raca" class="wc-input" formControlName="raca" placeholder="Ex: Cachorro - Poodle" />
+
+      <label for="pf-idade">Idade (anos) *</label>
+      <input id="pf-idade" class="wc-input" formControlName="idade" type="number" placeholder="Idade em anos" />
+
+      <label for="pf-peso">Peso (kg) *</label>
+      <input
+        id="pf-peso"
+        class="wc-input"
+        formControlName="peso"
+        type="text"
+        inputmode="decimal"
+        placeholder="Ex: 12,5"
+        autocomplete="off"
+        (input)="aoDigitarPeso($event)"
+      />
+
+      <label for="pf-alergias">Alergias</label>
+      <input id="pf-alergias" class="wc-input" formControlName="alergias" placeholder="Alergias conhecidas..." />
+
+      <label for="pf-info">Informações adicionais</label>
+      <input id="pf-info" class="wc-input" formControlName="informacoes" placeholder="Observações gerais..." />
+
+      <label for="pf-tutor">Tutor *</label>
+      <select id="pf-tutor" class="wc-input" formControlName="tutorId">
+        <option value="">Selecione um tutor</option>
+        <option *ngFor="let t of tutores" [value]="t.id">{{ t.nome }}</option>
+      </select>
+      <button
+        type="button"
+        class="atalho-cadastro"
+        *ngIf="permiteNovoTutor"
+        (click)="novoTutor.emit()"
+      >
+        + Cadastrar novo tutor
+      </button>
+
+      <p class="modal-erro" *ngIf="erro">{{ erro }}</p>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-outline" (click)="fechar.emit()">Cancelar</button>
+        <button type="submit" class="btn-primary" [disabled]="form.invalid || salvando">
+          {{ salvando ? 'Salvando...' : 'Salvar' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

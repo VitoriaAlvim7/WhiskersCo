@@ -1,0 +1,264 @@
+.page-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.section-title { font-size: 18px; font-weight: 800; margin-bottom: 16px; }
+.loading, .empty-row { text-align: center; color: var(--text-muted); padding: 32px 0; font-size: 14px; }
+
+.resumo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.resumo-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.resumo-label { font-size: 13px; color: var(--text-muted); font-weight: 700; }
+.resumo-valor { font-size: 24px; font-weight: 800; }
+.resumo-valor.entrada { color: var(--success); }
+.resumo-valor.saida   { color: var(--danger); }
+
+.row-actions { display: flex; gap: 8px; align-items: center; }
+
+.itens-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.btn-link {
+  background: none; border: none; color: var(--primary-text); font-size: 13px;
+  font-weight: 700; cursor: pointer;
+  &:hover { text-decoration: underline; }
+}
+
+.itens-lista { display: flex; flex-direction: column; gap: 8px; }
+
+.item-row {
+  display: grid;
+  grid-template-columns: 1fr 90px auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.qtd-input { text-align: center; }
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px 24px;
+
+  label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-top: 6px;
+  }
+}
+
+.modal-erro {
+  color: var(--danger);
+  font-size: 13px;
+  background: var(--danger-bg);
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.modal-box { max-width: 520px; }
+
+.page-top-acoes {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.mes-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nav-btn {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0 12px;
+  background: var(--bg-elevated);
+  color: var(--text-main);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+
+  &:hover { background: var(--bg-hover); border-color: var(--primary); }
+  &:focus-visible { outline: 2px solid var(--primary-text); outline-offset: 2px; }
+}
+
+.hoje-btn { font-size: 13px; }
+
+.mes-atual {
+  min-width: 150px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 15px;
+}
+
+.recorte-detalhe { margin-bottom: 20px; }
+
+.dia-input { max-width: 200px; }
+
+.modal-relatorio { max-width: 640px; }
+
+.relatorio-corpo {
+  padding: 20px 24px 0;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.relatorio-totais {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+
+  @media (max-width: 600px) { grid-template-columns: 1fr; }
+}
+
+.relatorio-total {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-hover);
+}
+
+.relatorio-contagem {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.relatorio-titulo {
+  font-size: 14px;
+  font-weight: 800;
+  margin: 18px 0 8px;
+}
+
+.relatorio-tabela th { font-size: 12px; }
+
+.relatorio-nota {
+  margin-top: 18px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--warning-bg);
+  color: var(--warning);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+// ---- Filtro por dia ----
+.dia-nav {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+
+  .dia-input { min-height: 44px; }
+  .hoje-btn:disabled { opacity: 0.5; cursor: default; }
+}
+
+.dia-extenso {
+  margin-left: 8px;
+  color: var(--text-muted);
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+// ---- Lista de transações ----
+.linha-clicavel {
+  cursor: pointer;
+  &:hover td { background: var(--bg-hover); }
+}
+
+.descricao-cel {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 150px;
+}
+
+.descricao-titulo { font-weight: 700; }
+.descricao-itens { font-size: 12px; color: var(--text-muted); }
+
+.valor-entrada { color: var(--success); font-weight: 700; }
+.valor-saida   { color: var(--danger);  font-weight: 700; }
+
+// ---- Detalhe da transação (mesmo visual do detalhe da Agenda) ----
+.modal-detalhe { max-width: 600px; }
+
+.detalhe-corpo {
+  padding: 20px 24px 0;
+  max-height: 65vh;
+  overflow-y: auto;
+}
+
+.detalhe-linha {
+  display: flex;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 14px;
+
+  &:last-child { border-bottom: none; }
+
+  dt {
+    flex: 0 0 120px;
+    color: var(--text-muted);
+    font-weight: 700;
+  }
+
+  dd { flex: 1; }
+}
+
+.detalhe-subtitulo {
+  margin: 18px 0 8px;
+  font-size: 14px;
+}
+
+.detalhe-itens {
+  .num { text-align: right; white-space: nowrap; }
+
+  tfoot td {
+    font-weight: 700;
+    border-top: 2px solid var(--border);
+  }
+
+  .total { font-size: 15px; }
+}
+
+.quando-cel {
+  white-space: nowrap;
+  span { display: block; }
+  .quando-hora { font-size: 12px; color: var(--text-muted); }
+}

@@ -1,0 +1,37 @@
+<div class="upload-foto">
+  <span class="upload-rotulo">{{ rotulo }}</span>
+
+  <div class="upload-corpo">
+    <img class="upload-previa" *ngIf="temFoto" [src]="src" [alt]="alt" />
+    <div class="upload-previa sem-foto" *ngIf="!temFoto" aria-hidden="true">
+      <app-icon [nome]="iconePlaceholder" [tamanho]="28"></app-icon>
+    </div>
+
+    <div class="upload-acoes">
+      <input
+        class="upload-input"
+        type="file"
+        [id]="idCampo"
+        [accept]="tiposAceitos"
+        [disabled]="enviando"
+        (change)="selecionar($event)"
+      />
+      <label class="upload-botao" [for]="idCampo">
+        {{ enviando ? 'Enviando...' : (temFoto ? 'Trocar foto' : 'Escolher foto') }}
+      </label>
+
+      <button
+        type="button"
+        class="upload-remover"
+        *ngIf="temFoto && !enviando"
+        (click)="remover()"
+      >
+        Remover
+      </button>
+
+      <span class="upload-dica">JPG, PNG ou WEBP, até 2 MB.</span>
+    </div>
+  </div>
+
+  <p class="upload-erro" *ngIf="erro" role="alert">{{ erro }}</p>
+</div>

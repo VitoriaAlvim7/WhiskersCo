@@ -1,0 +1,377 @@
+<div class="app-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content fade-up" id="conteudo-principal" tabindex="-1">
+    <div class="page-top">
+      <h1 class="page-title">Agenda</h1>
+      <div class="page-top-actions">
+        <div class="mes-nav">
+          <button class="nav-btn" (click)="mesAnterior()" title="Mês anterior">‹</button>
+          <button class="nav-btn hoje-btn" (click)="hoje()">Hoje</button>
+          <button class="nav-btn" (click)="proximoMes()" title="Próximo mês">›</button>
+        </div>
+        <button type="button" class="btn-outline" (click)="abrirRelatorio()">Relatório do mês</button>
+        <button type="button" class="btn-primary" (click)="abrirModal()">+ Nova Consulta</button>
+      </div>
+    </div>
+
+    <div class="calendarios-grid">
+      <div class="wc-card calendario" *ngFor="let m of meses">
+        <h3 class="mes-titulo">{{ m.nome }} {{ m.ano }}</h3>
+        <table class="cal-table">
+          <thead>
+            <tr>
+              <th *ngFor="let d of ['S','S','T','Q','Q','S','D']">{{ d }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let semana of m.semanas">
+              <td *ngFor="let dia of semana">
+                <button
+                  *ngIf="dia"
+                  type="button"
+                  class="dia"
+                  [class.tem-consulta]="temConsulta(m, dia)"
+                  [class.selecionado]="diaSelecionado(m, dia)"
+                  [attr.aria-pressed]="diaSelecionado(m, dia)"
+                  [attr.aria-label]="dia + ' de ' + m.nome + ' de ' + m.ano
+                    + (temConsulta(m, dia) ? ', com consultas' : ', sem consultas')"
+                  (click)="selecionarDia(m, dia)"
+                >
+                  {{ dia }}
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+      <app-paginacao
+        *ngIf="!carregando && !erroCarregar"
+        [total]="totalItens"
+        [pagina]="pagina"
+        [tamanhoPagina]="tamanhoPagina"
+        rotulo="Paginação de consultas"
+        (paginaChange)="irParaPagina($event)"
+      ></app-paginacao>
+      </div>
+    </div>
+
+    <div class="wc-card mt-24">
+      <h2 class="section-title">Consultas · {{ rotuloIntervalo }}</h2>
+
+      <div class="filtro-ativo" *ngIf="filtroDia">
+        <span>
+          Mostrando apenas <strong>{{ filtroDiaFormatado }}</strong>
+          ({{ totalItens }} consulta(s))
+        </span>
+        <button type="button" class="chip" (click)="limparFiltroDia()">
+          Limpar filtro
+        </button>
+      </div>
+
+      <div class="loading" *ngIf="carregando">Carregando consultas...</div>
+
+      <div class="erro-carregamento" *ngIf="!carregando && erroCarregar" role="alert">
+        Não foi possível carregar as consultas agora.
+        <button type="button" (click)="carregar()">Tentar novamente</button>
+      </div>
+
+      <table class="wc-table" *ngIf="!carregando && !erroCarregar">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Horário</th>
+            <th>Paciente</th>
+            <th>Veterinário</th>
+            <th>Motivo</th>
+            <th>Status</th>
+            <th><span class="sr-only">Ações</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of consultasVisiveis">
+            <td>{{ dataFormatada(c) }}</td>
+            <td>{{ horario(c) }}</td>
+            <td class="pet-name">{{ c.paciente }}</td>
+            <td>{{ c.funcionario }}</td>
+            <td>{{ c.motivo }}</td>
+            <td>
+              <select
+                class="wc-input status-select"
+                [ngModel]="c.status"
+                (ngModelChange)="atualizarStatus(c, $event)"
+                [attr.aria-label]="'Status da consulta de ' + c.paciente"
+              >
+                <option *ngFor="let s of statusOpcoes" [value]="s.valor">{{ s.label }}</option>
+              </select>
+            </td>
+            <td class="row-actions">
+              <button
+                type="button"
+                class="btn-acao"
+                (click)="abrirDetalhe(c)"
+                [attr.aria-label]="'Ver detalhes da consulta de ' + c.paciente"
+              >
+                <app-icon nome="olho" [tamanho]="16"></app-icon>
+              </button>
+              <button
+                type="button"
+                class="btn-acao"
+                (click)="abrirModal(c)"
+                [attr.aria-label]="'Editar consulta de ' + c.paciente"
+              >
+                <app-icon nome="editar" [tamanho]="16"></app-icon>
+              </button>
+              <button
+                type="button"
+                class="btn-acao"
+                *ngIf="podeFinalizar(c)"
+                (click)="finalizar(c)"
+                [attr.aria-label]="'Finalizar consulta de ' + c.paciente + ' e lançar no caixa'"
+                title="Finalizar e lançar no caixa"
+              >
+                <app-icon nome="sucesso" [tamanho]="16"></app-icon>
+              </button>
+              <button
+                type="button"
+                class="btn-acao perigo"
+                (click)="excluir(c)"
+                [attr.aria-label]="'Excluir consulta de ' + c.paciente"
+              >
+                <app-icon nome="lixeira" [tamanho]="16"></app-icon>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="consultasVisiveis.length === 0 && !carregando">
+            <td colspan="7" class="empty-row">
+              {{ filtroDia
+                  ? 'Nenhuma consulta em ' + filtroDiaFormatado + '.'
+                  : 'Nenhuma consulta em ' + rotuloIntervalo + '.' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" *ngIf="modalAberto" (click)="fecharModal()">
+  <div class="modal-box" appModalAcessivel (fechar)="fecharModal()" aria-labelledby="agenda-modal-titulo" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 id="agenda-modal-titulo">{{ editando ? 'Editar' : 'Nova' }} Consulta</h2>
+      <button class="modal-close" (click)="fecharModal()" aria-label="Fechar">
+            <app-icon nome="fechar" [tamanho]="18"></app-icon>
+          </button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="salvar()" class="modal-form">
+      <label>Data *</label>
+      <input class="wc-input" formControlName="data" type="date" />
+
+      <label>Horário *</label>
+      <input class="wc-input" formControlName="hora" type="time" />
+
+      <p class="aviso-passado" *ngIf="dataNoPassado">
+        Data e horário no passado: a consulta será registrada como <b>finalizada</b>.
+      </p>
+
+      <label>Paciente *</label>
+      <select class="wc-input" formControlName="pacienteId">
+        <option value="">Selecione um paciente</option>
+        <option *ngFor="let p of pacientes" [value]="p.id">{{ p.nome }}</option>
+      </select>
+
+      <label for="agenda-veterinario">Veterinário *</label>
+      <select
+        id="agenda-veterinario"
+        class="wc-input"
+        formControlName="funcionarioId"
+        *ngIf="veterinariosDoForm.length > 0"
+      >
+        <option value="">Selecione um veterinário</option>
+        <option *ngFor="let v of veterinariosDoForm" [value]="v.id">{{ v.nome }}</option>
+      </select>
+      <p class="campo-vazio" *ngIf="veterinariosDoForm.length === 0 && !carregandoVeterinarios">
+        Nenhum veterinário ativo cadastrado.
+        <a routerLink="/funcionarios">Cadastre um em Funcionários</a> para poder agendar consultas.
+      </p>
+
+      <label>Motivo *</label>
+      <input class="wc-input" formControlName="motivo" placeholder="Ex: Consulta de rotina, vacinação..." />
+
+      <p class="modal-erro" *ngIf="erro">{{ erro }}</p>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-outline" (click)="fecharModal()">Cancelar</button>
+        <button type="submit" class="btn-primary" [disabled]="salvando || form.invalid">
+          {{ salvando ? 'Salvando...' : 'Agendar' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="detalhe" (click)="fecharDetalhe()">
+  <div class="modal-box" appModalAcessivel (fechar)="fecharDetalhe()" aria-labelledby="agenda-detalhe-titulo" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 id="agenda-detalhe-titulo">Detalhes da consulta</h2>
+      <button class="modal-close" (click)="fecharDetalhe()" aria-label="Fechar">
+        <app-icon nome="fechar" [tamanho]="18"></app-icon>
+      </button>
+    </div>
+
+    <div class="detalhe-corpo">
+      <dl class="detalhe-lista">
+        <div class="detalhe-linha">
+          <dt>Paciente</dt>
+          <dd class="pet-name">{{ detalhe.paciente }}</dd>
+        </div>
+        <div class="detalhe-linha">
+          <dt>Tutor</dt>
+          <dd>
+            <span *ngIf="carregandoDetalhe">Carregando...</span>
+            <span *ngIf="!carregandoDetalhe">{{ tutorDoDetalhe || 'Sem tutor cadastrado' }}</span>
+          </dd>
+        </div>
+        <div class="detalhe-linha">
+          <dt>Veterinário</dt>
+          <dd>{{ detalhe.funcionario }}</dd>
+        </div>
+        <div class="detalhe-linha">
+          <dt>Data e horário</dt>
+          <dd>{{ dataFormatada(detalhe) }} às {{ horario(detalhe) }}</dd>
+        </div>
+        <div class="detalhe-linha">
+          <dt>Motivo</dt>
+          <dd>{{ detalhe.motivo }}</dd>
+        </div>
+        <div class="detalhe-linha">
+          <dt>Status</dt>
+          <dd>
+            <span class="badge" [ngClass]="(detalhe.status || '') | lowercase">
+              {{ statusLabel(detalhe.status) }}
+            </span>
+          </dd>
+        </div>
+      </dl>
+
+      <div class="detalhe-receita">
+        <h3>Receituário</h3>
+        <p class="sem-receita" *ngIf="!detalhe.receituario && !receitaAberta">
+          Nenhum receituário emitido nesta consulta.
+          <span *ngIf="detalhe.status !== 'FINALIZADA'">A receita fica disponível quando a consulta for finalizada.</span>
+        </p>
+        <button
+          type="button"
+          class="btn-primary"
+          *ngIf="podeGerarReceita(detalhe) && !receitaAberta"
+          (click)="abrirReceita()"
+        >Gerar Receita</button>
+
+        <div class="receita-form" *ngIf="receitaAberta">
+          <label for="agenda-prescricao">Prescrição médica *</label>
+          <textarea
+            id="agenda-prescricao"
+            class="wc-input"
+            rows="5"
+            [(ngModel)]="prescricaoReceita"
+            placeholder="Medicamentos, dosagem, orientações..."
+          ></textarea>
+          <p class="modal-erro" *ngIf="erroReceita">{{ erroReceita }}</p>
+          <div class="receita-acoes">
+            <button type="button" class="btn-outline" (click)="cancelarReceita()">Cancelar</button>
+            <button
+              type="button"
+              class="btn-primary"
+              [disabled]="gerandoReceita || !prescricaoReceita.trim()"
+              (click)="gerarReceita()"
+            >{{ gerandoReceita ? 'Gerando...' : 'Gerar arquivo' }}</button>
+          </div>
+        </div>
+
+        <div *ngIf="detalhe.receituario">
+          <p class="receita-data">
+            Emitido em {{ dataReceita(detalhe.receituario.dataEmissao) }}
+          </p>
+          <p class="receita-texto">{{ detalhe.receituario.prescricao }}</p>
+          <div class="receita-acoes">
+            <button type="button" class="btn-outline" [disabled]="carregandoDetalhe" (click)="imprimirReceita(detalhe)">Imprimir</button>
+            <button type="button" class="btn-outline" [disabled]="carregandoDetalhe" (click)="baixarReceita(detalhe)">Baixar PDF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer detalhe-acoes">
+      <button type="button" class="btn-outline" (click)="excluir(detalhe)">Excluir</button>
+      <button type="button" class="btn-primary" (click)="editarDoDetalhe(detalhe)">Editar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="modalRelatorioAberto" (click)="fecharRelatorio()">
+  <div class="modal-box modal-relatorio" appModalAcessivel (fechar)="fecharRelatorio()" aria-labelledby="agenda-relatorio-titulo" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 id="agenda-relatorio-titulo">Relatório · {{ rotuloIntervalo }}</h2>
+      <button type="button" class="modal-close" (click)="fecharRelatorio()" aria-label="Fechar">
+        <app-icon nome="fechar" [tamanho]="18"></app-icon>
+      </button>
+    </div>
+
+    <div class="relatorio-corpo" *ngIf="relatorio">
+      <p class="relatorio-total-geral">
+        <strong>{{ relatorio.total }}</strong> consulta(s) no período
+      </p>
+
+      <div class="relatorio-colunas">
+        <div>
+          <h3 class="relatorio-titulo">Por status</h3>
+          <ul class="relatorio-lista">
+            <li *ngFor="let s of porStatus">
+              <span class="badge" [ngClass]="s.chave | lowercase">{{ statusLabel(s.chave) }}</span>
+              <span class="relatorio-contagem">{{ s.total }}</span>
+            </li>
+            <li *ngIf="porStatus.length === 0" class="relatorio-vazio">Sem consultas.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="relatorio-titulo">Por veterinário</h3>
+          <ul class="relatorio-lista">
+            <li *ngFor="let v of porVeterinario">
+              <span>{{ v.chave }}</span>
+              <span class="relatorio-contagem">{{ v.total }}</span>
+            </li>
+            <li *ngIf="porVeterinario.length === 0" class="relatorio-vazio">Sem consultas.</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3 class="relatorio-titulo">Todas as consultas</h3>
+      <table class="wc-table relatorio-tabela">
+        <thead>
+          <tr><th>Data</th><th>Hora</th><th>Paciente</th><th>Veterinário</th><th>Status</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of relatorio.consultas">
+            <td>{{ dataFormatada(c) }}</td>
+            <td>{{ horario(c) }}</td>
+            <td class="pet-name">{{ c.paciente }}</td>
+            <td>{{ c.funcionario }}</td>
+            <td><span class="badge" [ngClass]="(c.status || '') | lowercase">{{ statusLabel(c.status) }}</span></td>
+          </tr>
+          <tr *ngIf="relatorio.consultas.length === 0">
+            <td colspan="5" class="empty-row">Nenhuma consulta no período.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn-outline" [disabled]="!relatorio || gerandoPdf" (click)="baixarRelatorioPdf()">
+        {{ gerandoPdf ? 'Gerando PDF...' : 'Baixar PDF' }}
+      </button>
+      <button type="button" class="btn-primary" (click)="fecharRelatorio()">Fechar</button>
+    </div>
+  </div>
+</div>

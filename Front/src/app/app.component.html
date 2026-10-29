@@ -1,0 +1,9 @@
+<a class="skip-link" href="#conteudo-principal" (click)="pularParaConteudo($event)">
+  Pular para o conteúdo
+</a>
+
+<router-outlet></router-outlet>
+<app-toast-container></app-toast-container>
+<app-confirm-dialog></app-confirm-dialog>
+
+<p class="sr-only" role="status" aria-live="polite">{{ anuncioDeRota }}</p>

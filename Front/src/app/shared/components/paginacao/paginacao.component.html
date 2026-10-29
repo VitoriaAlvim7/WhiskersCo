@@ -1,0 +1,42 @@
+<nav class="paginacao" *ngIf="totalPaginas > 1" [attr.aria-label]="rotulo">
+  <p class="pag-resumo" aria-live="polite">
+    Mostrando {{ primeiroItem }}–{{ ultimoItem }} de {{ total }}
+  </p>
+
+  <div class="pag-controles">
+    <button
+      type="button"
+      class="pag-btn"
+      [disabled]="pagina <= 1"
+      (click)="ir(pagina - 1)"
+      aria-label="Página anterior"
+    >
+      <app-icon nome="chevron-esquerda" [tamanho]="16"></app-icon>
+    </button>
+
+    <ng-container *ngFor="let p of paginas">
+      <span class="pag-elipse" *ngIf="p === elipse" aria-hidden="true">…</span>
+      <button
+        *ngIf="p !== elipse"
+        type="button"
+        class="pag-btn pag-num"
+        [class.atual]="p === pagina"
+        [attr.aria-current]="p === pagina ? 'page' : null"
+        [attr.aria-label]="'Página ' + p"
+        (click)="ir(p)"
+      >
+        {{ p }}
+      </button>
+    </ng-container>
+
+    <button
+      type="button"
+      class="pag-btn"
+      [disabled]="pagina >= totalPaginas"
+      (click)="ir(pagina + 1)"
+      aria-label="Próxima página"
+    >
+      <app-icon nome="chevron-direita" [tamanho]="16"></app-icon>
+    </button>
+  </div>
+</nav>

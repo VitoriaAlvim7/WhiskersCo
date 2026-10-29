@@ -1,0 +1,30 @@
+.page-top { margin-bottom: 24px; }
+.config-card { max-width: 560px; padding: 0; }
+
+.config-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+
+  &:last-child { border-bottom: none; }
+
+  h3 { font-size: 15px; font-weight: 800; margin-bottom: 4px; }
+  p { font-size: 13px; color: var(--text-muted); }
+}
+
+.btn-danger-outline {
+  background: none;
+  border: 1px solid var(--danger);
+  color: var(--danger);
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s;
+  white-space: nowrap;
+
+  &:hover { background: var(--danger-bg); }
+}

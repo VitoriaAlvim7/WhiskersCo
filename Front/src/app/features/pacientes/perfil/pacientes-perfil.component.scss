@@ -1,0 +1,86 @@
+app-back-button { display: inline-block; margin-bottom: 20px; }
+
+.perfil-grid {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 20px;
+  align-items: start;
+
+  @media (max-width: 900px) { grid-template-columns: 1fr; }
+}
+
+.id-card {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  .pet-avatar {
+    display: flex;
+    justify-content: center;
+    img {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--border);
+    }
+  }
+
+  .pet-id {
+    text-align: center;
+    h2 { font-size: 20px; font-weight: 800; }
+    .pet-especie { color: var(--text-muted); font-size: 13px; margin-top: 4px; }
+    .pet-tutor { color: var(--text-muted); font-size: 13px; margin-top: 2px; }
+  }
+}
+
+.med-info {
+  h3 {
+    font-size: 16px;
+    font-weight: 800;
+    margin-bottom: 14px;
+  }
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px 20px;
+  font-size: 14px;
+}
+
+.info-label {
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.btn-info {
+  background: var(--primary);
+  color: var(--text-on-primary);
+  border: none;
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 12px;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  cursor: pointer;
+  &:hover { background: var(--primary-dark); }
+}
+
+.empty-row, .loading {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 32px 0;
+  font-size: 14px;
+}
+
+.perfil-topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 24px;
+
+  .page-title { margin-bottom: 0; }
+}

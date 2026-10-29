@@ -1,0 +1,112 @@
+<div class="app-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content fade-up" id="conteudo-principal" tabindex="-1">
+    <div class="page-top">
+      <h1 class="page-title">Pacientes</h1>
+      <div class="page-actions">
+        <div class="search-bar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input
+            type="text"
+            placeholder="Buscar paciente ou tutor..."
+            [(ngModel)]="busca"
+            (ngModelChange)="filtrar()"
+          />
+        </div>
+        <button class="btn-primary" (click)="abrirModal()">
+          + Novo Paciente
+        </button>
+      </div>
+    </div>
+
+    <div class="wc-card">
+      <div class="loading" *ngIf="carregando">Carregando pacientes...</div>
+
+      <div class="erro-carregamento" *ngIf="!carregando && erroCarregar" role="alert">
+        Não foi possível carregar os pacientes agora.
+        <button type="button" (click)="carregarPacientes()">Tentar novamente</button>
+      </div>
+
+      <table class="wc-table" *ngIf="!carregando && !erroCarregar">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Raça</th>
+            <th>Tutor</th>
+            <th>Peso</th>
+            <th>Alergias</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let p of paginados"
+            class="clickable-row"
+            (click)="verPerfil(p.id!)"
+          >
+            <td class="pet-name">
+              <span class="pet-com-foto">
+                <img class="pet-foto" [src]="foto(p)" [alt]="'Foto de ' + p.nome" loading="lazy" />
+                {{ p.nome }}
+              </span>
+            </td>
+            <td>{{ p.raca }}</td>
+            <td>{{ p.tutorNome }}</td>
+            <td>{{ pesoFormatado(p.peso) }} kg</td>
+            <td>{{ p.alergias || 'Nenhuma' }}</td>
+            <td class="row-actions">
+              <button
+                type="button"
+                class="btn-acao"
+                (click)="abrirModal(p, $event)"
+                [attr.aria-label]="'Editar ' + p.nome"
+              >
+                <app-icon nome="editar" [tamanho]="16"></app-icon>
+              </button>
+              <button
+                type="button"
+                class="btn-acao perigo"
+                (click)="excluir(p.id!, $event)"
+                [attr.aria-label]="'Excluir ' + p.nome"
+              >
+                <app-icon nome="lixeira" [tamanho]="16"></app-icon>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="filtrados.length === 0 && !carregando">
+            <td colspan="6" class="empty-row">
+              {{ busca ? 'Nenhum resultado encontrado.' : 'Nenhum paciente cadastrado.' }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <app-paginacao
+        *ngIf="!carregando && !erroCarregar"
+        [total]="filtrados.length"
+        [pagina]="pagina"
+        rotulo="Paginação de pacientes"
+        (paginaChange)="pagina = $event"
+      ></app-paginacao>
+    </div>
+  </main>
+</div>
+
+<app-paciente-form-modal
+  [aberto]="modalAberto"
+  [paciente]="editando"
+  [tutores]="tutores"
+  [permiteNovoTutor]="true"
+  (fechar)="fecharModal()"
+  (salvo)="aoSalvarPaciente()"
+  (novoTutor)="abrirModalTutor()"
+></app-paciente-form-modal>
+
+<app-tutor-form-modal
+  [aberto]="modalTutorAberto"
+  (fechar)="fecharModalTutor()"
+  (salvo)="aoSalvarTutor($event)"
+></app-tutor-form-modal>

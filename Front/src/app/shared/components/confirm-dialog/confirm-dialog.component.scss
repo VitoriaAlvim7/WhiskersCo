@@ -1,0 +1,97 @@
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 1100;
+  animation: fadeUp 0.2s ease;
+}
+
+.confirm-box {
+  background: var(--bg-elevated);
+  color: var(--text-main);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow);
+  width: 100%;
+  max-width: 420px;
+  padding: 24px;
+}
+
+.confirm-titulo {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.confirm-mensagem {
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.confirm-aviso {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--danger-bg);
+  color: var(--danger);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.confirm-acoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.confirm-cancelar,
+.confirm-confirmar {
+  min-height: 44px;
+  padding: 10px 22px;
+  border-radius: 8px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-text);
+    outline-offset: 2px;
+  }
+}
+
+.confirm-cancelar {
+  background: transparent;
+  color: var(--text-main);
+  border: 1.5px solid var(--border);
+
+  &:hover { background: var(--bg-hover); }
+}
+
+.confirm-confirmar {
+  background: var(--primary);
+  color: var(--text-on-primary);
+  border: 1.5px solid var(--primary);
+
+  &:hover { background: var(--primary-dark); }
+
+  &.destrutivo {
+    background: var(--danger-bg);
+    color: var(--danger);
+    border-color: var(--danger);
+
+    &:hover { background: var(--danger-bg-hover); }
+    &:focus-visible { outline-color: var(--danger); }
+  }
+}

@@ -1,0 +1,169 @@
+<div class="app-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content fade-up" id="conteudo-principal" tabindex="-1">
+
+    <div class="page-top">
+      <div>
+        <h1 class="page-title">Painel de Funcionários</h1>
+        <p class="page-subtitle">Gerenciamento e informações dos funcionários</p>
+      </div>
+      <button class="btn-primary" (click)="abrirModal()">+ Novo Funcionário</button>
+    </div>
+
+    <div class="wc-card">
+      <h2 class="section-title">Informações</h2>
+
+      <div class="loading" *ngIf="carregando">Carregando...</div>
+
+      <div class="erro-carregamento" *ngIf="!carregando && erroCarregar" role="alert">
+        Não foi possível carregar os funcionários agora.
+        <button type="button" (click)="carregar()">Tentar novamente</button>
+      </div>
+
+      <table class="wc-table" *ngIf="!carregando && !erroCarregar">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Função</th>
+            <th>Status</th>
+            <th>Agenda</th>
+            <th><span class="sr-only">Ações</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let f of paginados">
+            <td class="func-nome">{{ f.nome }}</td>
+            <td>{{ funcaoLabel(f.funcao) }}</td>
+            <td>
+              <span class="badge" [ngClass]="f.statusFuncionario | lowercase">
+                {{ f.statusFuncionario === 'ATIVO' ? 'Ativo' : 'Desativado' }}
+              </span>
+            </td>
+            <td>{{ resumoAgenda(f.agendaFaixas) }}</td>
+            <td class="row-actions">
+              <button
+                type="button"
+                class="btn-acao"
+                (click)="abrirModal(f)"
+                [attr.aria-label]="'Editar funcionário ' + f.nome"
+              >
+                <app-icon nome="editar" [tamanho]="16"></app-icon>
+              </button>
+              <button
+                type="button"
+                class="btn-acao perigo"
+                (click)="excluir(f.id!)"
+                [attr.aria-label]="'Excluir funcionário ' + f.nome"
+              >
+                <app-icon nome="lixeira" [tamanho]="16"></app-icon>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="funcionarios.length === 0 && !carregando">
+            <td colspan="5" class="empty-row">Nenhum funcionário cadastrado.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <app-paginacao
+        *ngIf="!carregando && !erroCarregar"
+        [total]="funcionarios.length"
+        [pagina]="pagina"
+        rotulo="Paginação de funcionários"
+        (paginaChange)="pagina = $event"
+      ></app-paginacao>
+    </div>
+
+  </main>
+</div>
+
+<div class="modal-overlay" *ngIf="modalAberto" (click)="fecharModal()">
+  <div class="modal-box" appModalAcessivel (fechar)="fecharModal()" aria-labelledby="funcionarios-modal-titulo" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 id="funcionarios-modal-titulo">{{ editando ? 'Editar' : 'Novo' }} Funcionário</h2>
+      <button class="modal-close" (click)="fecharModal()" aria-label="Fechar">
+            <app-icon nome="fechar" [tamanho]="18"></app-icon>
+          </button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="salvar()" class="modal-form">
+      <app-upload-foto
+        rotulo="Foto de perfil"
+        iconePlaceholder="pessoa"
+        [fotoUrl]="form.get('fotoUrl')?.value"
+        [descricao]="form.get('nome')?.value || 'funcionário'"
+        (fotoUrlChange)="aoTrocarFoto($event)"
+      ></app-upload-foto>
+
+      <label>Nome *</label>
+      <input class="wc-input" formControlName="nome" placeholder="Nome completo" />
+
+      <label>Função *</label>
+      <select class="wc-input" formControlName="funcao">
+        <option value="GERENTE">Gerente</option>
+        <option value="VETERINARIO">Veterinário(a)</option>
+        <option value="RECEPCIONISTA">Recepcionista</option>
+        <option value="AUXILIAR">Auxiliar</option>
+      </select>
+
+      <fieldset class="agenda-editor" formArrayName="agenda">
+        <legend>Agenda de atendimento</legend>
+        <p class="agenda-dica">
+          Marque os dias em que atende. Consultas fora da agenda são recusadas ao agendar.
+        </p>
+
+        <div class="agenda-dia" *ngFor="let dia of diasDaSemana; let i = index" [formGroupName]="i">
+          <label class="agenda-check">
+            <input type="checkbox" formControlName="atende" />
+            <span>{{ dia.rotulo }}</span>
+          </label>
+
+          <div class="agenda-horas" [class.desativado]="!agenda.at(i).get('atende')?.value">
+            <label class="sr-only" [attr.for]="'inicio-' + dia.valor">Início de {{ dia.rotulo }}</label>
+            <input
+              class="wc-input hora-input"
+              type="time"
+              [id]="'inicio-' + dia.valor"
+              formControlName="horaInicio"
+              [attr.disabled]="agenda.at(i).get('atende')?.value ? null : true"
+            />
+            <span aria-hidden="true">até</span>
+            <label class="sr-only" [attr.for]="'fim-' + dia.valor">Fim de {{ dia.rotulo }}</label>
+            <input
+              class="wc-input hora-input"
+              type="time"
+              [id]="'fim-' + dia.valor"
+              formControlName="horaFim"
+              [attr.disabled]="agenda.at(i).get('atende')?.value ? null : true"
+            />
+          </div>
+        </div>
+      </fieldset>
+
+      <label>Status</label>
+      <select class="wc-input" formControlName="statusFuncionario">
+        <option value="ATIVO">Ativo</option>
+        <option value="DESATIVADO">Desativado</option>
+      </select>
+
+      <label>E-mail *</label>
+      <input class="wc-input" formControlName="email" type="email" placeholder="email@exemplo.com" />
+
+      <ng-container *ngIf="!editando">
+        <label>Senha *</label>
+        <input class="wc-input" formControlName="senha" type="password" placeholder="Mínimo 6 caracteres" />
+      </ng-container>
+      <p class="modal-hint" *ngIf="editando">A senha não é alterada por aqui.</p>
+
+      <p class="modal-erro" *ngIf="erro">{{ erro }}</p>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-outline" (click)="fecharModal()">Cancelar</button>
+        <button type="submit" class="btn-primary" [disabled]="salvando || form.invalid">
+          {{ salvando ? 'Salvando...' : 'Salvar' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

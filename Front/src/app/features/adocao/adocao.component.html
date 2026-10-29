@@ -1,0 +1,167 @@
+<div class="app-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content fade-up" id="conteudo-principal" tabindex="-1">
+    <div class="page-top">
+      <h1 class="page-title">Animais para Adoção</h1>
+      <button class="btn-primary" (click)="abrirModal()">+ Cadastrar Animal</button>
+    </div>
+
+    <div class="filtro-chips" role="group" aria-label="Filtrar animais por status" *ngIf="!carregando">
+      <button
+        type="button"
+        class="chip"
+        *ngFor="let f of filtros"
+        [class.ativo]="filtroStatus === f.valor"
+        [attr.aria-pressed]="filtroStatus === f.valor"
+        (click)="mudarFiltro(f.valor)">
+        {{ f.rotulo }} <span class="chip-contagem">{{ contar(f.valor) }}</span>
+      </button>
+    </div>
+
+    <div class="loading" *ngIf="carregando">Carregando...</div>
+
+    <div class="erro-carregamento" *ngIf="!carregando && erroCarregar" role="alert">
+      Não foi possível carregar os animais para adoção agora.
+      <button type="button" (click)="carregar()">Tentar novamente</button>
+    </div>
+
+    <div class="animais-grid" *ngIf="!carregando && !erroCarregar">
+      <div class="animal-card wc-card" *ngFor="let a of animaisPaginados">
+        <div class="animal-img-wrap">
+          <img [src]="fotoDe(a)" [alt]="a.fotoUrl ? 'Foto de ' + a.nome : ''" />
+          <span class="badge" [ngClass]="(a.statusAdocao || '') | lowercase">
+            {{ statusLabel(a.statusAdocao) }}
+          </span>
+        </div>
+        <div class="animal-info">
+          <h3>{{ a.nome }}</h3>
+          <p class="animal-sub">{{ a.raca }} · {{ a.idade }} ano(s)</p>
+          <p class="animal-desc" *ngIf="a.informacoes">{{ a.informacoes }}</p>
+        </div>
+        <div class="animal-actions">
+          <button type="button" class="btn-outline" (click)="abrirModal(a)">Editar</button>
+          <button
+            type="button"
+            class="btn-primary"
+            [disabled]="!podeAdotar(a)"
+            [attr.title]="motivoNaoAdotavel(a) || null"
+            [attr.aria-label]="podeAdotar(a) ? 'Adotar ' + a.nome : motivoNaoAdotavel(a)"
+            (click)="abrirModalAdocao(a)"
+          >
+            Adotar
+          </button>
+          <button
+            type="button"
+            class="btn-danger"
+            (click)="excluir(a.id!)"
+            [attr.aria-label]="'Remover ' + a.nome + ' da lista de adoção'"
+          >
+            <app-icon nome="lixeira" [tamanho]="14"></app-icon>
+          </button>
+        </div>
+      </div>
+
+      <div class="empty-grid" *ngIf="animaisFiltrados.length === 0">
+        {{ animais.length === 0
+            ? 'Nenhum animal cadastrado para adoção.'
+            : 'Nenhum animal com esse status.' }}
+      </div>
+    </div>
+
+    <app-paginacao
+      *ngIf="!carregando && !erroCarregar"
+      [total]="animaisFiltrados.length"
+      [pagina]="pagina"
+      rotulo="Paginação de animais para adoção"
+      (paginaChange)="pagina = $event"
+    ></app-paginacao>
+  </main>
+</div>
+
+<div class="modal-overlay" *ngIf="modalAberto" (click)="fecharModal()">
+  <div class="modal-box" appModalAcessivel (fechar)="fecharModal()" aria-labelledby="adocao-modal-titulo" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 id="adocao-modal-titulo">{{ editando ? 'Editar' : 'Cadastrar' }} Animal</h2>
+      <button class="modal-close" (click)="fecharModal()" aria-label="Fechar">
+            <app-icon nome="fechar" [tamanho]="18"></app-icon>
+          </button>
+    </div>
+    <form [formGroup]="form" (ngSubmit)="salvar()" class="modal-form">
+      <app-upload-foto
+        rotulo="Foto do animal"
+        [fotoUrl]="form.get('fotoUrl')?.value"
+        [descricao]="form.get('nome')?.value || 'animal'"
+        (fotoUrlChange)="aoTrocarFoto($event)"
+      ></app-upload-foto>
+
+      <label>Nome *</label>
+      <input class="wc-input" formControlName="nome" />
+
+      <label>Raça *</label>
+      <input class="wc-input" formControlName="raca" placeholder="SRD ou raça específica" />
+
+      <label>Idade (anos)</label>
+      <input class="wc-input" type="number" formControlName="idade" min="0" />
+
+      <label>Peso (kg)</label>
+      <input
+        class="wc-input"
+        type="text"
+        inputmode="decimal"
+        formControlName="peso"
+        placeholder="Ex: 12,5"
+        autocomplete="off"
+        (input)="aoDigitarPeso($event)"
+      />
+
+      <label>Alergias</label>
+      <input class="wc-input" formControlName="alergias" placeholder="Alergias conhecidas..." />
+
+      <label>Informações</label>
+      <textarea class="wc-input" formControlName="informacoes" rows="3" placeholder="Personalidade, cuidados..."></textarea>
+
+      <label>Status</label>
+      <select class="wc-input" formControlName="statusAdocao">
+        <option value="DISPONIVEL">Disponível</option>
+        <option value="EM_TRATAMENTO">Em tratamento</option>
+        <option value="ADOTADO">Adotado</option>
+      </select>
+
+      <p class="modal-erro" *ngIf="erro">{{ erro }}</p>
+      <div class="modal-footer">
+        <button type="button" class="btn-outline" (click)="fecharModal()">Cancelar</button>
+        <button type="submit" class="btn-primary" [disabled]="salvando || form.invalid">
+          {{ salvando ? 'Salvando...' : 'Salvar' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="modalAdocaoAberto" (click)="fecharModalAdocao()">
+  <div class="modal-box" appModalAcessivel (fechar)="fecharModalAdocao()" aria-labelledby="adocao-confirmar-titulo" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 id="adocao-confirmar-titulo">Confirmar Adoção — {{ animalParaAdotar?.nome }}</h2>
+      <button class="modal-close" (click)="fecharModalAdocao()" aria-label="Fechar">
+            <app-icon nome="fechar" [tamanho]="18"></app-icon>
+          </button>
+    </div>
+    <div class="modal-form">
+      <label>Tutor adotante *</label>
+      <select class="wc-input" [(ngModel)]="tutorEscolhido">
+        <option value="">Selecione um tutor</option>
+        <option *ngFor="let t of tutores" [value]="t.id">{{ t.nome }}</option>
+      </select>
+      <p class="modal-hint">O animal vira paciente da clínica, vinculado a este tutor. Ele continua na lista de adoção, com o status Adotado.</p>
+      <p class="modal-erro" *ngIf="erroAdocao">{{ erroAdocao }}</p>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-outline" (click)="fecharModalAdocao()">Cancelar</button>
+        <button type="button" class="btn-primary" [disabled]="!tutorEscolhido || adotando" (click)="confirmarAdocao()">
+          {{ adotando ? 'Confirmando...' : 'Confirmar Adoção' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

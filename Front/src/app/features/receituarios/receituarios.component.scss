@@ -1,0 +1,50 @@
+.page-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 16px;
+}
+
+.page-subtitle { color: var(--text-muted); font-size: 14px; margin-top: 4px; }
+.loading, .empty-row { text-align: center; color: var(--text-muted); padding: 32px 0; font-size: 14px; }
+
+.busca-input { margin-bottom: 16px; max-width: 360px; }
+
+.prescricao-cell {
+  max-width: 340px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.row-actions { display: flex; gap: 8px; align-items: center; }
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px 24px;
+
+  label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-top: 6px;
+  }
+}
+
+.modal-erro {
+  color: var(--danger);
+  font-size: 13px;
+  background: var(--danger-bg);
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}

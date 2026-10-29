@@ -1,0 +1,29 @@
+<div class="brand-panel">
+  <div class="brand-glow" aria-hidden="true"></div>
+  <div class="paws-bg" aria-hidden="true"></div>
+
+  <div class="brand-content">
+    <div class="brand-lockup">
+      <img src="assets/logo.png" alt="" class="brand-logo" />
+      <span class="brand-name">Whiskers &amp; Co.</span>
+    </div>
+
+    <h1 class="brand-headline">O cuidado da sua clínica, em um só lugar.</h1>
+    <p class="brand-sub">
+      Agenda, prontuários, estoque e caixa organizados — para você cuidar do
+      que importa: os pacientes.
+    </p>
+
+    <ul class="brand-features">
+      <li *ngFor="let r of recursos">
+        <span class="feature-icon">
+          <app-icon [nome]="r.icone" [tamanho]="18"></app-icon>
+        </span>
+        <span class="feature-text">
+          <strong>{{ r.titulo }}</strong>
+          <span>{{ r.descricao }}</span>
+        </span>
+      </li>
+    </ul>
+  </div>
+</div>

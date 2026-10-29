@@ -1,0 +1,30 @@
+.campo-senha {
+  position: relative;
+  width: 100%;
+
+  .wc-input {
+    padding-right: 44px;
+  }
+}
+
+.botao-olho {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+
+  &:hover { background: var(--bg-hover); color: var(--primary-text); }
+  &:focus-visible { outline: 2px solid var(--primary-text); outline-offset: 1px; }
+  &:disabled { cursor: not-allowed; opacity: 0.5; }
+}

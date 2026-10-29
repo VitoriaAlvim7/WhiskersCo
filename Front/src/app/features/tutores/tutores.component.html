@@ -1,0 +1,123 @@
+<div class="app-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content fade-up" id="conteudo-principal" tabindex="-1">
+
+    <div class="page-top">
+      <div class="page-top-left">
+        <h1 class="page-title">Tutores</h1>
+        <span class="total-badge">{{ filtrados.length }} {{ filtrados.length === 1 ? 'tutor' : 'tutores' }}</span>
+      </div>
+      <div class="page-top-right">
+        <div class="search-bar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <label class="sr-only" for="busca-tutor">Buscar tutor</label>
+          <input
+            id="busca-tutor"
+            type="text"
+            placeholder="Nome, CPF ou telefone"
+            [(ngModel)]="busca"
+            (ngModelChange)="filtrar()"
+          />
+        </div>
+        <button type="button" class="btn-primary" (click)="abrirModal()">+ Cadastrar Tutor</button>
+      </div>
+    </div>
+
+    <div class="filtro-chips" role="group" aria-label="Filtrar tutores">
+      <button
+        type="button"
+        class="chip"
+        *ngFor="let a of abas"
+        [class.ativo]="aba === a.valor"
+        [attr.aria-pressed]="aba === a.valor"
+        (click)="mudarAba(a.valor)"
+      >
+        {{ a.rotulo }}
+      </button>
+    </div>
+
+    <div class="wc-card">
+      <div class="loading" *ngIf="carregando">Carregando tutores...</div>
+
+      <div class="erro-carregamento" *ngIf="!carregando && erroCarregar" role="alert">
+        Não foi possível carregar os tutores agora.
+        <button type="button" (click)="carregar()">Tentar novamente</button>
+      </div>
+
+      <table class="wc-table" *ngIf="!carregando && !erroCarregar">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>CPF</th>
+            <th>Telefone</th>
+            <th>Endereço</th>
+            <th><span class="sr-only">Ações</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let t of paginados">
+            <td class="tutor-nome">{{ t.nome }}</td>
+            <td>{{ cpfFormatado(t.cpf) }}</td>
+            <td>{{ telefoneFormatado(t.telefone) }}</td>
+            <td>{{ t.endereco || '—' }}</td>
+            <td class="row-actions">
+              <ng-container *ngIf="aba === 'ATIVOS'">
+                <button
+                  type="button"
+                  class="btn-acao"
+                  (click)="abrirModal(t)"
+                  [attr.aria-label]="'Editar ' + t.nome"
+                >
+                  <app-icon nome="editar" [tamanho]="16"></app-icon>
+                </button>
+                <button
+                  type="button"
+                  class="btn-acao perigo"
+                  (click)="excluir(t)"
+                  [attr.aria-label]="'Excluir ' + t.nome"
+                >
+                  <app-icon nome="lixeira" [tamanho]="16"></app-icon>
+                </button>
+              </ng-container>
+              <button
+                type="button"
+                class="btn-outline btn-reativar"
+                *ngIf="aba === 'INATIVOS'"
+                (click)="reativar(t)"
+                [attr.aria-label]="'Reativar ' + t.nome"
+              >
+                Reativar
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="filtrados.length === 0 && !carregando">
+            <td colspan="5" class="empty-row">
+              {{ busca
+                  ? 'Nenhum tutor encontrado para essa busca.'
+                  : (aba === 'ATIVOS' ? 'Nenhum tutor cadastrado.' : 'Nenhum tutor inativo.') }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <app-paginacao
+        *ngIf="!carregando && !erroCarregar"
+        [total]="filtrados.length"
+        [pagina]="pagina"
+        rotulo="Paginação de tutores"
+        (paginaChange)="pagina = $event"
+      ></app-paginacao>
+    </div>
+
+  </main>
+</div>
+
+<app-tutor-form-modal
+  [aberto]="modalAberto"
+  [tutor]="editando"
+  (fechar)="fecharModal()"
+  (salvo)="aoSalvar()"
+></app-tutor-form-modal>

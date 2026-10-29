@@ -1,0 +1,21 @@
+<div class="app-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content fade-up" id="conteudo-principal" tabindex="-1">
+    <div class="page-top">
+      <app-back-button></app-back-button>
+      <h1 class="page-title">Ajuda</h1>
+      <p class="page-subtitle">Perguntas frequentes sobre o sistema</p>
+    </div>
+
+    <div class="wc-card faq-card">
+      <div class="faq-item" *ngFor="let p of perguntas">
+        <button class="faq-pergunta" (click)="toggle(p)">
+          <span>{{ p.pergunta }}</span>
+          <app-icon class="faq-icone" [class.aberto]="p.aberta" nome="chevron" [tamanho]="18"></app-icon>
+        </button>
+        <p class="faq-resposta" *ngIf="p.aberta">{{ p.resposta }}</p>
+      </div>
+    </div>
+  </main>
+</div>

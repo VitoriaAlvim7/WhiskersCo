@@ -1,0 +1,77 @@
+<div class="app-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content fade-up" id="conteudo-principal" tabindex="-1">
+    <app-back-button rotulo="Voltar para Pacientes" rotaFallback="/pacientes"></app-back-button>
+
+    <ng-container *ngIf="paciente && !carregando">
+      <div class="perfil-topo">
+        <h1 class="page-title">Perfil do Paciente</h1>
+        <button type="button" class="btn-outline" (click)="abrirEdicao()">
+          <app-icon nome="editar" [tamanho]="16"></app-icon>
+          Editar paciente
+        </button>
+      </div>
+
+      <div class="perfil-grid">
+        <div class="wc-card id-card">
+          <div class="pet-avatar">
+            <img [src]="fotoDe(paciente)" [alt]="paciente.fotoUrl ? 'Foto de ' + paciente.nome : ''" />
+          </div>
+          <div class="pet-id">
+            <h2>{{ paciente.nome }}</h2>
+            <p class="pet-especie">{{ paciente.raca }}</p>
+            <p class="pet-tutor">Dono: {{ paciente.tutorNome }}</p>
+          </div>
+
+          <div class="med-info">
+            <h3>Informações médicas</h3>
+            <div class="info-grid">
+              <span class="info-label">Raça</span>    <span>{{ paciente.raca }}</span>
+              <span class="info-label">Idade</span>   <span>{{ paciente.idade }} anos</span>
+              <span class="info-label">Peso</span>    <span>{{ pesoFormatado(paciente.peso) }} Kg</span>
+              <span class="info-label">Alergias</span><span>{{ paciente.alergias || 'Nenhuma conhecida' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="wc-card historico-card">
+          <h2 class="section-title">Histórico médico</h2>
+          <table class="wc-table">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Motivo</th>
+                <th>Veterinário</th>
+                <th>Descrição</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let h of historico">
+                <td>{{ h.data }}</td>
+                <td>{{ h.motivo }}</td>
+                <td>{{ h.veterinario }}</td>
+                <td>{{ h.descricao }}</td>
+                <td><button class="btn-info">Informações</button></td>
+              </tr>
+              <tr *ngIf="historico.length === 0">
+                <td colspan="5" class="empty-row">Sem histórico médico.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </ng-container>
+
+    <div class="loading" *ngIf="carregando">Carregando...</div>
+  </main>
+</div>
+
+<app-paciente-form-modal
+  [aberto]="modalAberto"
+  [paciente]="paciente"
+  [tutores]="tutores"
+  (fechar)="fecharEdicao()"
+  (salvo)="aoSalvar($event)"
+></app-paciente-form-modal>

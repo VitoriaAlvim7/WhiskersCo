@@ -1,0 +1,356 @@
+<div class="app-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content fade-up" id="conteudo-principal" tabindex="-1">
+    <div class="page-top">
+      <h1 class="page-title">Caixa</h1>
+      <div class="page-top-acoes">
+        <div class="mes-nav" role="group" aria-label="Navegar entre meses" *ngIf="recorte !== 'DIA'">
+          <button type="button" class="nav-btn" (click)="mesAnterior()" aria-label="Mês anterior">‹</button>
+          <span class="mes-atual">{{ nomeMes }}</span>
+          <button type="button" class="nav-btn" (click)="proximoMes()" aria-label="Próximo mês">›</button>
+          <button type="button" class="nav-btn hoje-btn" (click)="mesAtual()">Mês atual</button>
+        </div>
+        <button type="button" class="btn-outline" (click)="abrirRelatorio()">Relatório do período</button>
+        <button type="button" class="btn-primary" (click)="abrirModal()">+ Nova Transação</button>
+      </div>
+    </div>
+
+    <div class="filtro-chips" role="group" aria-label="Recorte do período">
+      <button
+        type="button"
+        class="chip"
+        *ngFor="let r of recortes"
+        [class.ativo]="recorte === r.valor"
+        [attr.aria-pressed]="recorte === r.valor"
+        (click)="mudarRecorte(r.valor)"
+      >
+        {{ r.rotulo }}
+      </button>
+    </div>
+
+    <div class="filtro-chips recorte-detalhe" *ngIf="recorte === 'SEMANA'" role="group" aria-label="Semana do mês">
+      <button
+        type="button"
+        class="chip"
+        *ngFor="let s of semanas; let i = index"
+        [class.ativo]="semanaEscolhida === i"
+        [attr.aria-pressed]="semanaEscolhida === i"
+        (click)="escolherSemana(i)"
+      >
+        {{ s.rotulo }}
+      </button>
+    </div>
+
+    <div class="recorte-detalhe dia-nav" *ngIf="recorte === 'DIA'" role="group" aria-label="Escolher o dia">
+      <button type="button" class="nav-btn" (click)="diaAnterior()" aria-label="Dia anterior">‹</button>
+      <label class="sr-only" for="caixa-dia">Dia</label>
+      <input
+        id="caixa-dia"
+        class="wc-input dia-input"
+        type="date"
+        [ngModel]="diaEscolhido"
+        (ngModelChange)="escolherDia($event)"
+      />
+      <button type="button" class="nav-btn" (click)="proximoDia()" aria-label="Próximo dia">›</button>
+      <button type="button" class="nav-btn hoje-btn" (click)="irParaHoje()" [disabled]="ehHoje">Hoje</button>
+      <span class="dia-extenso">{{ diaFormatado }}</span>
+    </div>
+
+    <div class="resumo-grid">
+      <div class="wc-card resumo-card">
+        <span class="resumo-label">Entradas · {{ rotuloIntervalo }}</span>
+        <span class="resumo-valor entrada">{{ formatarValor(totalEntradas) }}</span>
+      </div>
+      <div class="wc-card resumo-card">
+        <span class="resumo-label">Saídas · {{ rotuloIntervalo }}</span>
+        <span class="resumo-valor saida">{{ formatarValor(totalSaidas) }}</span>
+      </div>
+      <div class="wc-card resumo-card">
+        <span class="resumo-label">Saldo do período</span>
+        <span class="resumo-valor">{{ formatarValor(totalEntradas - totalSaidas) }}</span>
+      </div>
+    </div>
+
+    <div class="wc-card mt-24">
+      <h2 class="section-title">Transações · {{ rotuloIntervalo }}</h2>
+      <div class="loading" *ngIf="carregando">Carregando...</div>
+
+      <div class="erro-carregamento" *ngIf="!carregando && erroCarregar" role="alert">
+        Não foi possível carregar as transações agora.
+        <button type="button" (click)="carregar()">Tentar novamente</button>
+      </div>
+
+      <table class="wc-table" *ngIf="!carregando && !erroCarregar">
+        <thead>
+          <tr>
+            <th>Quando</th>
+            <th>Tipo</th>
+            <th>Descrição</th>
+            <th>Método</th>
+            <th>Valor</th>
+            <th><span class="sr-only">Ações</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let t of transacoes" class="linha-clicavel" (click)="abrirDetalhe(t)">
+            <td class="quando-cel">
+              <span>{{ dataFormatada(t) }}</span>
+              <span class="quando-hora">{{ horario(t) }}</span>
+            </td>
+            <td><span class="badge" [ngClass]="t.tipo | lowercase">{{ t.tipo === 'ENTRADA' ? 'Entrada' : 'Saída' }}</span></td>
+            <td class="descricao-cel">
+              <span class="descricao-titulo">{{ descricao(t) }}</span>
+              <span class="descricao-itens">{{ resumoItens(t) }}</span>
+            </td>
+            <td>{{ metodoLabel(t.metodoPagamento) }}</td>
+            <td [class.valor-entrada]="t.tipo === 'ENTRADA'" [class.valor-saida]="t.tipo === 'SAIDA'">{{ formatarValor(t.valorTotal) }}</td>
+            <td class="row-actions" (click)="$event.stopPropagation()">
+              <button
+                type="button"
+                class="btn-acao"
+                (click)="abrirDetalhe(t)"
+                [attr.aria-label]="'Ver detalhes da transação de ' + dataFormatada(t) + ', ' + formatarValor(t.valorTotal)"
+              >
+                <app-icon nome="olho" [tamanho]="16"></app-icon>
+              </button>
+              <button
+                type="button"
+                class="btn-acao perigo"
+                (click)="excluir(t.id!)"
+                [attr.aria-label]="'Excluir transação de ' + dataFormatada(t) + ', ' + formatarValor(t.valorTotal)"
+              >
+                <app-icon nome="lixeira" [tamanho]="16"></app-icon>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="transacoes.length === 0">
+            <td colspan="6" class="empty-row">Nenhuma transação em {{ rotuloIntervalo }}.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <app-paginacao
+        *ngIf="!carregando && !erroCarregar"
+        [total]="totalItens"
+        [pagina]="pagina"
+        [tamanhoPagina]="tamanhoPagina"
+        rotulo="Paginação de transações"
+        (paginaChange)="irParaPagina($event)"
+      ></app-paginacao>
+    </div>
+  </main>
+</div>
+
+<div class="modal-overlay" *ngIf="modalAberto" (click)="fecharModal()">
+  <div class="modal-box" appModalAcessivel (fechar)="fecharModal()" aria-labelledby="caixa-modal-titulo" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 id="caixa-modal-titulo">Nova Transação</h2>
+      <button class="modal-close" (click)="fecharModal()" aria-label="Fechar">
+            <app-icon nome="fechar" [tamanho]="18"></app-icon>
+          </button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="salvar()" class="modal-form">
+      <label>Data e hora *</label>
+      <input class="wc-input" type="datetime-local" formControlName="dataHora" />
+
+      <label>Tipo *</label>
+      <select class="wc-input" formControlName="tipo">
+        <option value="ENTRADA">Entrada</option>
+        <option value="SAIDA">Saída</option>
+      </select>
+
+      <label>Método de pagamento *</label>
+      <select class="wc-input" formControlName="metodoPagamento">
+        <option value="PIX">Pix</option>
+        <option value="DINHEIRO">Dinheiro</option>
+        <option value="CARTAO_CREDITO">Cartão de Crédito</option>
+        <option value="CARTAO_DEBITO">Cartão de Débito</option>
+      </select>
+
+      <label>Funcionário responsável *</label>
+      <select class="wc-input" formControlName="funcionarioId">
+        <option value="">Selecione</option>
+        <option *ngFor="let f of funcionarios" [value]="f.id">{{ f.nome }}</option>
+      </select>
+
+      <label>Consulta vinculada (opcional)</label>
+      <select class="wc-input" formControlName="consultaId">
+        <option value="">Nenhuma (venda avulsa)</option>
+        <option *ngFor="let c of consultas" [value]="c.id">{{ c.paciente }} · {{ c.motivo }}</option>
+      </select>
+
+      <label>Valor de serviço (taxa de consulta, etc.)</label>
+      <input class="wc-input" type="number" step="0.01" min="0" formControlName="valor" />
+
+      <div class="itens-header">
+        <label>Itens vendidos</label>
+        <button type="button" class="btn-link" (click)="adicionarItem()">+ Adicionar item</button>
+      </div>
+
+      <div formArrayName="itens" class="itens-lista">
+        <div class="item-row" *ngFor="let item of itens.controls; let i = index" [formGroupName]="i">
+          <select class="wc-input" formControlName="produtoId">
+            <option value="">Item</option>
+            <option *ngFor="let p of produtos" [value]="p.id">{{ p.nome }}</option>
+          </select>
+          <input class="wc-input qtd-input" type="number" min="1" formControlName="quantidade" placeholder="Qtd" />
+          <button type="button" class="btn-danger" (click)="removerItem(i)" aria-label="Remover item">
+              <app-icon nome="fechar" [tamanho]="16"></app-icon>
+            </button>
+        </div>
+      </div>
+
+      <p class="modal-erro" *ngIf="erro">{{ erro }}</p>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-outline" (click)="fecharModal()">Cancelar</button>
+        <button type="submit" class="btn-primary" [disabled]="salvando || form.invalid">
+          {{ salvando ? 'Salvando...' : 'Registrar' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="detalhe" (click)="fecharDetalhe()">
+  <div class="modal-box modal-detalhe" appModalAcessivel (fechar)="fecharDetalhe()" aria-labelledby="caixa-detalhe-titulo" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 id="caixa-detalhe-titulo">{{ detalhe.tipo === 'ENTRADA' ? 'Entrada' : 'Saída' }} · {{ dataFormatada(detalhe) }} às {{ horario(detalhe) }}</h2>
+      <button type="button" class="modal-close" (click)="fecharDetalhe()" aria-label="Fechar">
+        <app-icon nome="fechar" [tamanho]="18"></app-icon>
+      </button>
+    </div>
+
+    <div class="detalhe-corpo">
+      <dl class="detalhe-lista">
+        <div class="detalhe-linha">
+          <dt>Tipo</dt>
+          <dd><span class="badge" [ngClass]="detalhe.tipo | lowercase">{{ detalhe.tipo === 'ENTRADA' ? 'Entrada' : 'Saída' }}</span></dd>
+        </div>
+        <div class="detalhe-linha">
+          <dt>Pagamento</dt>
+          <dd>{{ metodoLabel(detalhe.metodoPagamento) }}</dd>
+        </div>
+        <div class="detalhe-linha">
+          <dt>Registrado por</dt>
+          <dd>{{ detalhe.funcionarioNome || '—' }}</dd>
+        </div>
+        <div class="detalhe-linha">
+          <dt>Consulta</dt>
+          <dd>{{ detalhe.consultaDescricao || (detalhe.tipo === 'SAIDA' ? 'Compra de estoque' : 'Venda avulsa, sem consulta') }}</dd>
+        </div>
+      </dl>
+
+      <h3 class="detalhe-subtitulo">{{ detalhe.tipo === 'ENTRADA' ? 'Itens vendidos' : 'Itens comprados' }}</h3>
+      <table class="wc-table detalhe-itens">
+        <thead>
+          <tr><th>Item</th><th class="num">Qtd.</th><th class="num">Preço</th><th class="num">Subtotal</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let i of detalhe.itens">
+            <td>{{ i.produtoNome }}</td>
+            <td class="num">{{ i.quantidade }}</td>
+            <td class="num">{{ formatarValor(i.preco) }}</td>
+            <td class="num">{{ formatarValor(subtotalItem(i)) }}</td>
+          </tr>
+          <tr *ngIf="outrosValores(detalhe) !== 0">
+            <td colspan="3">Outros valores (taxa de serviço ou ajuste)</td>
+            <td class="num">{{ formatarValor(outrosValores(detalhe)) }}</td>
+          </tr>
+          <tr *ngIf="!detalhe.itens?.length && outrosValores(detalhe) === 0">
+            <td colspan="4" class="empty-row">Nenhum item lançado nesta transação.</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="3">Total</td>
+            <td class="num total">{{ formatarValor(detalhe.valorTotal) }}</td>
+          </tr>
+        </tfoot>
+      </table>
+      <p class="relatorio-nota">Preço e subtotal usam o preço atual de cada item; o total é o valor gravado no lançamento.</p>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn-primary" (click)="fecharDetalhe()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" *ngIf="modalRelatorioAberto" (click)="fecharRelatorio()">
+  <div class="modal-box modal-relatorio" appModalAcessivel (fechar)="fecharRelatorio()" aria-labelledby="caixa-relatorio-titulo" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 id="caixa-relatorio-titulo">Relatório · {{ rotuloIntervalo }}</h2>
+      <button type="button" class="modal-close" (click)="fecharRelatorio()" aria-label="Fechar">
+        <app-icon nome="fechar" [tamanho]="18"></app-icon>
+      </button>
+    </div>
+
+    <div class="relatorio-corpo" *ngIf="relatorio">
+      <div class="relatorio-totais">
+        <div class="relatorio-total">
+          <span class="resumo-label">Vendas (entradas)</span>
+          <span class="resumo-valor entrada">{{ formatarValor(relatorio.totalEntradas) }}</span>
+          <span class="relatorio-contagem">{{ relatorio.quantidadeEntradas }} lançamento(s)</span>
+        </div>
+        <div class="relatorio-total">
+          <span class="resumo-label">Compras (saídas)</span>
+          <span class="resumo-valor saida">{{ formatarValor(relatorio.totalSaidas) }}</span>
+          <span class="relatorio-contagem">{{ relatorio.quantidadeSaidas }} lançamento(s)</span>
+        </div>
+        <div class="relatorio-total">
+          <span class="resumo-label">Saldo</span>
+          <span class="resumo-valor">{{ formatarValor(relatorio.saldo) }}</span>
+        </div>
+      </div>
+
+      <h3 class="relatorio-titulo">Itens vendidos</h3>
+      <table class="wc-table relatorio-tabela">
+        <thead>
+          <tr><th>Item</th><th>Qtd.</th><th>Valor</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let i of itensVendidos">
+            <td>{{ i.produtoNome }}</td>
+            <td>{{ i.quantidade }}</td>
+            <td>{{ formatarValor(i.valorTotal) }}</td>
+          </tr>
+          <tr *ngIf="itensVendidos.length === 0">
+            <td colspan="3" class="empty-row">Nenhum item vendido no período.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3 class="relatorio-titulo">Itens comprados</h3>
+      <table class="wc-table relatorio-tabela">
+        <thead>
+          <tr><th>Item</th><th>Qtd.</th><th>Valor</th></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let i of itensComprados">
+            <td>{{ i.produtoNome }}</td>
+            <td>{{ i.quantidade }}</td>
+            <td>{{ formatarValor(i.valorTotal) }}</td>
+          </tr>
+          <tr *ngIf="itensComprados.length === 0">
+            <td colspan="3" class="empty-row">Nenhum item comprado no período.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p class="relatorio-nota">
+        O valor por item usa o preço atual do produto — a transação não guarda o preço
+        praticado na época. Os totais acima vêm do valor gravado em cada lançamento.
+      </p>
+    </div>
+
+    <div class="modal-footer">
+      <button type="button" class="btn-outline" [disabled]="!relatorio || gerandoPdf" (click)="baixarRelatorioPdf()">
+        {{ gerandoPdf ? 'Gerando PDF...' : 'Baixar PDF' }}
+      </button>
+      <button type="button" class="btn-primary" (click)="fecharRelatorio()">Fechar</button>
+    </div>
+  </div>
+</div>

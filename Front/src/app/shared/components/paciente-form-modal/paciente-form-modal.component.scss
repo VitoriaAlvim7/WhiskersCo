@@ -1,0 +1,28 @@
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px 24px;
+
+  label {
+    font-size: 13px;
+    font-weight: 700;
+    margin-top: 6px;
+  }
+}
+
+.modal-erro {
+  color: var(--danger);
+  font-size: 13px;
+  background: var(--danger-bg);
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}

@@ -1,0 +1,50 @@
+<div class="auth-wrapper">
+  <app-auth-brand-panel></app-auth-brand-panel>
+
+  <div class="auth-form-side fade-up">
+    <div class="auth-form-content">
+      <h1 class="auth-heading">Entrar</h1>
+      <p class="auth-subheading">Acesse o painel da sua clínica.</p>
+
+      <form [formGroup]="form" (ngSubmit)="entrar()" class="auth-form" novalidate>
+        <div class="field">
+          <label for="login-email">E-mail</label>
+          <input
+            id="login-email"
+            class="wc-input"
+            type="email"
+            formControlName="email"
+            placeholder="voce@clinica.com"
+            autocomplete="email"
+            autofocus
+          />
+        </div>
+
+        <div class="field">
+          <label for="login-senha">Senha</label>
+          <app-campo-senha
+            id="login-senha"
+            formControlName="senha"
+            placeholder="Digite a sua senha"
+            autocomplete="current-password"
+          ></app-campo-senha>
+        </div>
+
+        <p class="auth-error" *ngIf="erro">{{ erro }}</p>
+
+        <button
+          type="submit"
+          class="btn-primary w-full"
+          [disabled]="loading"
+        >
+          {{ loading ? 'Entrando...' : 'Entrar' }}
+        </button>
+      </form>
+
+      <p class="auth-link">
+        Não possui uma conta?
+        <a routerLink="/login/cadastro">crie uma!</a>
+      </p>
+    </div>
+  </div>
+</div>

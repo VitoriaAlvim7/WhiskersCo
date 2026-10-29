@@ -1,0 +1,53 @@
+.page-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.page-top-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  .page-title { margin-bottom: 0; }
+}
+
+.total-badge {
+  background: var(--bg-elevated);
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.page-top-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  .search-bar { width: 300px; }
+}
+
+.tutor-nome { font-weight: 700; }
+
+.btn-reativar {
+  padding: 6px 16px;
+  font-size: 13px;
+  min-height: 44px;
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-text);
+    outline-offset: 2px;
+  }
+}
+
+.loading,
+.empty-row {
+  text-align: center;
+  color: var(--text-muted);
+  padding: 40px 0;
+  font-size: 14px;
+}

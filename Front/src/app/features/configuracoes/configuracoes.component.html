@@ -1,0 +1,31 @@
+<div class="app-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content fade-up" id="conteudo-principal" tabindex="-1">
+    <div class="page-top">
+      <app-back-button></app-back-button>
+      <h1 class="page-title">Configurações</h1>
+    </div>
+
+    <div class="wc-card config-card">
+      <div class="config-row">
+        <div>
+          <h3>Tema</h3>
+          <p>Alterne entre o modo claro e escuro.</p>
+        </div>
+        <button class="btn-outline" (click)="alternarTema()">
+          <app-icon [nome]="temaAtual() === 'escuro' ? 'sol' : 'lua'" [tamanho]="16"></app-icon>
+          <span>{{ temaAtual() === 'escuro' ? 'Modo claro' : 'Modo escuro' }}</span>
+        </button>
+      </div>
+
+      <div class="config-row">
+        <div>
+          <h3>Sessão</h3>
+          <p>Encerrar sua sessão neste dispositivo.</p>
+        </div>
+        <button class="btn-danger-outline" (click)="sair()">Sair</button>
+      </div>
+    </div>
+  </main>
+</div>

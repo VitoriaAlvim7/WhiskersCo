@@ -1,0 +1,58 @@
+<div class="auth-wrapper">
+  <app-auth-brand-panel></app-auth-brand-panel>
+
+  <div class="auth-form-side fade-up">
+    <div class="auth-form-content">
+      <h1 class="auth-heading">Criar conta</h1>
+      <p class="auth-subheading">Cadastre-se para começar a usar o Whiskers &amp; Co.</p>
+
+      <form [formGroup]="form" (ngSubmit)="cadastrar()" class="auth-form" novalidate>
+        <div class="field">
+          <label for="cad-nome">Nome</label>
+          <input
+            id="cad-nome"
+            class="wc-input"
+            type="text"
+            formControlName="nome"
+            placeholder="Seu nome completo"
+            autocomplete="name"
+            autofocus
+          />
+        </div>
+
+        <div class="field">
+          <label for="cad-email">E-mail</label>
+          <input
+            id="cad-email"
+            class="wc-input"
+            type="email"
+            formControlName="email"
+            placeholder="voce@clinica.com"
+            autocomplete="email"
+          />
+        </div>
+
+        <div class="field">
+          <label for="cad-senha">Senha</label>
+          <app-campo-senha
+            id="cad-senha"
+            formControlName="senha"
+            placeholder="Mínimo de 6 caracteres"
+            autocomplete="new-password"
+          ></app-campo-senha>
+        </div>
+
+        <p class="auth-error" *ngIf="erro">{{ erro }}</p>
+
+        <button type="submit" class="btn-primary w-full" [disabled]="loading">
+          {{ loading ? 'Criando conta...' : 'Criar conta' }}
+        </button>
+      </form>
+
+      <p class="auth-link">
+        Já possui uma conta?
+        <a routerLink="/login">entre aqui!</a>
+      </p>
+    </div>
+  </div>
+</div>

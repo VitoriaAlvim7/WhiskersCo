@@ -1,0 +1,36 @@
+.page-top { margin-bottom: 24px; }
+.loading { text-align: center; color: var(--text-muted); padding: 32px 0; font-size: 14px; }
+.section-title { font-size: 18px; font-weight: 800; margin-bottom: 16px; }
+
+.perfil-card { max-width: 480px; }
+
+.perfil-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-top: 6px;
+  }
+
+  button { margin-top: 12px; align-self: flex-start; }
+}
+
+.msg-erro {
+  color: var(--danger);
+  font-size: 13px;
+  background: var(--danger-bg);
+  padding: 8px 12px;
+  border-radius: 8px;
+}
+
+.msg-sucesso {
+  color: var(--success);
+  font-size: 13px;
+  background: var(--success-bg);
+  padding: 8px 12px;
+  border-radius: 8px;
+}

@@ -1,0 +1,33 @@
+<div class="confirm-overlay" *ngIf="pedido" (click)="cancelar()">
+  <div
+    class="confirm-box"
+    #caixa
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="confirm-titulo"
+    aria-describedby="confirm-mensagem"
+    (click)="$event.stopPropagation()"
+  >
+    <h2 class="confirm-titulo" id="confirm-titulo">{{ pedido.titulo }}</h2>
+    <p class="confirm-mensagem" id="confirm-mensagem">{{ pedido.mensagem }}</p>
+
+    <p class="confirm-aviso" *ngIf="pedido.aviso">
+      <app-icon nome="alerta" [tamanho]="16"></app-icon>
+      <span>{{ pedido.aviso }}</span>
+    </p>
+
+    <div class="confirm-acoes">
+      <button type="button" class="confirm-cancelar" #botaoCancelar (click)="cancelar()">
+        {{ textoCancelar }}
+      </button>
+      <button
+        type="button"
+        class="confirm-confirmar"
+        [class.destrutivo]="destrutivo"
+        (click)="confirmar()"
+      >
+        {{ textoConfirmar }}
+      </button>
+    </div>
+  </div>
+</div>

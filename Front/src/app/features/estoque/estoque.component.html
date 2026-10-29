@@ -1,0 +1,204 @@
+<div class="app-layout">
+  <app-sidebar></app-sidebar>
+
+  <main class="main-content fade-up" id="conteudo-principal" tabindex="-1">
+
+    <div class="page-top">
+      <div class="page-top-left">
+        <h1 class="page-title">Estoque</h1>
+        <span class="total-badge">{{ produtos.length }} itens cadastrados</span>
+      </div>
+      <div class="page-top-right">
+        <div class="search-bar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <label class="sr-only" for="busca-estoque">Buscar {{ naturezaAtiva === 'SERVICO' ? 'serviço' : 'produto' }}</label>
+          <input
+            id="busca-estoque"
+            type="text"
+            [placeholder]="'Digite o nome do ' + (naturezaAtiva === 'SERVICO' ? 'serviço' : 'produto')"
+            [(ngModel)]="busca"
+            (ngModelChange)="filtrar()"
+          />
+        </div>
+        <button type="button" class="btn-primary" (click)="abrirModal()">
+          + Cadastrar {{ naturezaAtiva === 'SERVICO' ? 'Serviço' : 'Produto' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="filtro-chips filtro-natureza" role="group" aria-label="Navegar entre produtos e serviços">
+      <button
+        type="button"
+        class="chip"
+        *ngFor="let n of naturezas"
+        [class.ativo]="naturezaAtiva === n.valor"
+        [attr.aria-pressed]="naturezaAtiva === n.valor"
+        (click)="mudarNatureza(n.valor)"
+      >
+        {{ n.rotulo }} <span class="chip-contagem">{{ contarNatureza(n.valor) }}</span>
+      </button>
+    </div>
+
+    <div class="filtro-chips" role="group" [attr.aria-label]="'Filtrar por tipo de ' + (naturezaAtiva === 'SERVICO' ? 'serviço' : 'produto')">
+      <button
+        type="button"
+        class="chip"
+        *ngFor="let t of tiposDaNaturezaAtiva"
+        [class.ativo]="filtroTipo === t.valor"
+        [attr.aria-pressed]="filtroTipo === t.valor"
+        (click)="mudarTipo(t.valor)"
+      >
+        {{ t.rotulo }} <span class="chip-contagem">{{ contarTipo(t.valor) }}</span>
+      </button>
+    </div>
+
+    <div class="wc-card">
+      <div class="loading" *ngIf="carregando">Carregando...</div>
+
+      <div class="erro-carregamento" *ngIf="!carregando && erroCarregar" role="alert">
+        Não foi possível carregar {{ naturezaAtiva === 'SERVICO' ? 'os serviços' : 'os produtos' }} agora.
+        <button type="button" (click)="carregar()">Tentar novamente</button>
+      </div>
+
+      <table class="wc-table" *ngIf="!carregando && !erroCarregar">
+        <thead>
+          <tr>
+            <th><span class="sr-only">Foto</span></th>
+            <th>{{ naturezaAtiva === 'SERVICO' ? 'Serviço' : 'Produto' }} Cadastrado</th>
+            <th>Tipo</th>
+            <th>Quantidade</th>
+            <th>Preço</th>
+            <th><span class="sr-only">Ações</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of paginados">
+            <td class="produto-img-cell">
+              <img class="produto-thumb" [src]="fotoDe(p)" [alt]="p.fotoUrl ? 'Foto de ' + p.nome : ''" />
+            </td>
+            <td class="produto-nome">{{ p.nome }}</td>
+            <td>{{ tipoLabel(p) }}</td>
+            <td>{{ p.naturezaItem === 'SERVICO' ? '—' : p.quantidade }}</td>
+            <td>{{ formatarPreco(p.preco) }}</td>
+            <td class="row-actions">
+              <button
+                type="button"
+                class="btn-acao"
+                (click)="abrirModal(p)"
+                [attr.aria-label]="'Editar ' + p.nome"
+              >
+                <app-icon nome="editar" [tamanho]="16"></app-icon>
+              </button>
+              <button
+                type="button"
+                class="btn-acao perigo"
+                (click)="excluir(p)"
+                [attr.aria-label]="'Excluir ' + p.nome"
+              >
+                <app-icon nome="lixeira" [tamanho]="16"></app-icon>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="filtrados.length === 0 && !carregando">
+            <td colspan="6" class="empty-row">
+              {{ busca
+                  ? 'Nenhum resultado encontrado.'
+                  : (naturezaAtiva === 'SERVICO' ? 'Nenhum serviço cadastrado.' : 'Nenhum produto cadastrado.') }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <app-paginacao
+        *ngIf="!carregando && !erroCarregar"
+        [total]="filtrados.length"
+        [pagina]="pagina"
+        [rotulo]="'Paginação de ' + (naturezaAtiva === 'SERVICO' ? 'serviços' : 'produtos')"
+        (paginaChange)="pagina = $event"
+      ></app-paginacao>
+    </div>
+
+  </main>
+</div>
+
+<div class="modal-overlay" *ngIf="modalAberto" (click)="fecharModal()">
+  <div class="modal-box" appModalAcessivel (fechar)="fecharModal()" aria-labelledby="estoque-modal-titulo" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2 id="estoque-modal-titulo">{{ editando ? 'Editar' : 'Cadastrar' }} {{ ehServico ? 'Serviço' : 'Produto' }}</h2>
+      <button type="button" class="modal-close" (click)="fecharModal()" aria-label="Fechar">
+        <app-icon nome="fechar" [tamanho]="18"></app-icon>
+      </button>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="salvar()" class="modal-form">
+      <app-upload-foto
+        [rotulo]="ehServico ? 'Imagem do serviço' : 'Foto do produto'"
+        iconePlaceholder="estoque"
+        [fotoUrl]="form.get('fotoUrl')?.value"
+        [descricao]="form.get('nome')?.value || 'item'"
+        (fotoUrlChange)="aoTrocarFoto($event)"
+      ></app-upload-foto>
+
+      <label for="prod-natureza">Natureza *</label>
+      <select id="prod-natureza" class="wc-input" formControlName="naturezaItem" (change)="aoTrocarNatureza()">
+        <option value="PRODUTO">Produto (tem estoque)</option>
+        <option value="SERVICO">Serviço (sem estoque)</option>
+      </select>
+
+      <label for="prod-nome">Nome {{ ehServico ? 'do serviço' : 'do produto' }} *</label>
+      <input
+        id="prod-nome"
+        class="wc-input"
+        formControlName="nome"
+        [placeholder]="ehServico ? 'Ex: Banho e tosa' : 'Ex: Ração Premium'"
+      />
+
+      <ng-container *ngIf="!ehServico">
+        <label for="prod-quantidade">Quantidade *</label>
+        <input id="prod-quantidade" class="wc-input" type="number" formControlName="quantidade" min="0" />
+
+        <label for="prod-tipo-produto">Tipo de produto *</label>
+        <select id="prod-tipo-produto" class="wc-input" formControlName="tipoProduto">
+          <option value="MEDICAMENTO">Medicamento</option>
+          <option value="ALIMENTO">Alimento</option>
+          <option value="ACESSORIO">Acessório</option>
+          <option value="OUTRO">Outro</option>
+        </select>
+      </ng-container>
+
+      <ng-container *ngIf="ehServico">
+        <label for="prod-tipo-servico">Tipo de serviço *</label>
+        <select id="prod-tipo-servico" class="wc-input" formControlName="tipoServico">
+          <option value="CONSULTA">Consulta</option>
+          <option value="CIRURGIA">Cirurgia</option>
+          <option value="VACINACAO">Vacinação</option>
+          <option value="BANHO_TOSA">Banho e tosa</option>
+          <option value="EXAME">Exame</option>
+          <option value="OUTRO">Outro</option>
+        </select>
+      </ng-container>
+
+      <label for="prod-preco">Preço (R$) *</label>
+      <input id="prod-preco" class="wc-input" type="number" formControlName="preco" min="0" step="0.01" />
+
+      <label for="prod-descricao">Descrição</label>
+      <input
+        id="prod-descricao"
+        class="wc-input"
+        formControlName="descricao"
+        [placeholder]="ehServico ? 'Detalhes do serviço...' : 'Detalhes do produto...'"
+      />
+
+      <p class="modal-erro" *ngIf="erro">{{ erro }}</p>
+
+      <div class="modal-footer">
+        <button type="button" class="btn-outline" (click)="fecharModal()">Cancelar</button>
+        <button type="submit" class="btn-primary" [disabled]="salvando || form.invalid">
+          {{ salvando ? 'Salvando...' : 'Salvar' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,19 @@
+<div class="toast-container" role="region" aria-label="Notificações" aria-live="polite">
+  <div
+    class="toast"
+    [class]="'toast--' + toast.tipo"
+    *ngFor="let toast of (toasts$ | async)"
+    role="status"
+  >
+    <app-icon class="toast-icone" [nome]="icone(toast.tipo)" [tamanho]="18"></app-icon>
+    <p class="toast-mensagem">{{ toast.mensagem }}</p>
+    <button
+      type="button"
+      class="toast-fechar"
+      (click)="fechar(toast.id)"
+      aria-label="Fechar notificação"
+    >
+      <app-icon nome="fechar" [tamanho]="14"></app-icon>
+    </button>
+  </div>
+</div>
