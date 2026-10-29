@@ -1,0 +1,22 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    command: ["postgres", "-c", "timezone=${DB_TIMEZONE:-America/Sao_Paulo}"]
+    environment:
+      TZ: ${DB_TIMEZONE:-America/Sao_Paulo}
+      POSTGRES_DB: ${POSTGRES_DB:-whiskers}
+      POSTGRES_USER: ${POSTGRES_USER:-whiskers}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - whiskers_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-whiskers} -d ${POSTGRES_DB:-whiskers}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  whiskers_pgdata:
